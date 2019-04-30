@@ -4,6 +4,10 @@
     "module": "commonjs",
     "declaration": true,
     "strict": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "typeRoots": ["types", "./node_modules/@types"],
+    "paths": {
+      "@type/*": ["types/*"]
+    }
   }
 }
