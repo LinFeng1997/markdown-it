@@ -74,6 +74,7 @@ interface MarkdownIt {
     inline: ParserInline;
     linkify: LinkifyIt;
     renderer: Renderer;
+    options: MarkdownIt.Options;
 }
 
 declare module MarkdownIt {

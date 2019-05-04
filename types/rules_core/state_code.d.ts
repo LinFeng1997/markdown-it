@@ -1,4 +1,4 @@
-import MarkdownIt = require("..");
+import MarkdownIt = require("../index");
 import Token = require("../token");
 
 export = StateCore;

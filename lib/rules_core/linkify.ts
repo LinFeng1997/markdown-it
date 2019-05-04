@@ -4,29 +4,41 @@
 //
 'use strict';
 
+import State = require('../../types/rules_core/state_code');
+import Token = require('../../types/token');
 
-var arrayReplaceAt = require('../common/utils').arrayReplaceAt;
+const arrayReplaceAt = require('../common/utils').arrayReplaceAt;
 
 
-function isLinkOpen(str) {
+function isLinkOpen(str:string):boolean {
   return /^<a[>\s]/i.test(str);
 }
-function isLinkClose(str) {
+function isLinkClose(str:string):boolean {
   return /^<\/a\s*>/i.test(str);
 }
 
 
-module.exports = function linkify(state) {
-  var i, j, l, tokens, token, currentToken, nodes, ln, text, pos, lastPos,
-      level, htmlLinkLevel, url, fullUrl, urlText,
-      blockTokens = state.tokens,
-      links;
+export = function linkify(state:State) {
+  let tokens: Token[],
+    token: Token,
+    currentToken: Token,
+    nodes: Token[],
+    text: string,
+    pos: number,
+    lastPos: number,
+    level: number,
+    htmlLinkLevel: number,
+    url: string,
+    fullUrl: string,
+    urlText: string,
+    blockTokens: Token[] = state.tokens,
+    links: any[];
 
   if (!state.md.options.linkify) { return; }
 
-  for (j = 0, l = blockTokens.length; j < l; j++) {
+  for (let j = 0, l: number = blockTokens.length; j < l; j++) {
     if (blockTokens[j].type !== 'inline' ||
-        !state.md.linkify.pretest(blockTokens[j].content)) {
+      !state.md.linkify.pretest(blockTokens[j].content)) {
       continue;
     }
 
@@ -36,7 +48,7 @@ module.exports = function linkify(state) {
 
     // We scan from the end, to keep position when new tags added.
     // Use reversed logic in links start/end match
-    for (i = tokens.length - 1; i >= 0; i--) {
+    for (let i = tokens.length - 1; i >= 0; i--) {
       currentToken = tokens[i];
 
       // Skip content of markdown links
@@ -69,7 +81,7 @@ module.exports = function linkify(state) {
         level = currentToken.level;
         lastPos = 0;
 
-        for (ln = 0; ln < links.length; ln++) {
+        for (let ln = 0; ln < links.length; ln++) {
 
           url = links[ln].url;
           fullUrl = state.md.normalizeLink(url);
