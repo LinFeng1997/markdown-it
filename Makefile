@@ -44,7 +44,7 @@ test:
 	# lint
 	mocha --require ts-node/register
 	echo "CommonMark stat:\n"
-	./support/specsplit.js test/fixtures/commonmark/spec.txt
+	./node_modules/.bin/ts-node ./support/specsplit.js test/fixtures/commonmark/spec.txt
 
 coverage:
 	rm -rf coverage

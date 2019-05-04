@@ -6,7 +6,7 @@
 
 'use strict';
 
-
+var MarkdownIt = require('../index.ts');
 var fs        = require('fs');
 var util      = require('util');
 var argparse  = require('argparse');
@@ -61,7 +61,7 @@ function readFile(filename, encoding, callback) {
 
 readFile(options.spec, 'utf8', function (error, input) {
   var good = [], bad = [],
-      markdown = require('..')('commonmark');
+      markdown = new MarkdownIt('commonmark');
 
   if (error) {
     if (error.code === 'ENOENT') {
