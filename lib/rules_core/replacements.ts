@@ -11,32 +11,35 @@
 //
 'use strict';
 
+import State = require('../../types/rules_core/state_code');
+import Token = require('../../types/token');
+
 // TODO:
 // - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
 // - miltiplication 2 x 4 -> 2 × 4
 
-var RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--/;
+const RARE_RE = /\+-|\.\.|\?\?\?\?|!!!!|,,|--/;
 
 // Workaround for phantomjs - need regex without /g flag,
 // or root check will fail every second time
-var SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
+const SCOPED_ABBR_TEST_RE = /\((c|tm|r|p)\)/i;
 
-var SCOPED_ABBR_RE = /\((c|tm|r|p)\)/ig;
-var SCOPED_ABBR = {
+const SCOPED_ABBR_RE = /\((c|tm|r|p)\)/ig;
+const SCOPED_ABBR = {
   c: '©',
   r: '®',
   p: '§',
   tm: '™'
 };
 
-function replaceFn(match, name) {
+function replaceFn(match:string, name:string):string {
   return SCOPED_ABBR[name.toLowerCase()];
 }
 
-function replace_scoped(inlineTokens) {
-  var i, token, inside_autolink = 0;
+function replace_scoped(inlineTokens:Token[]) {
+  let token:Token, inside_autolink:number = 0;
 
-  for (i = inlineTokens.length - 1; i >= 0; i--) {
+  for (let i = inlineTokens.length - 1; i >= 0; i--) {
     token = inlineTokens[i];
 
     if (token.type === 'text' && !inside_autolink) {
@@ -53,10 +56,10 @@ function replace_scoped(inlineTokens) {
   }
 }
 
-function replace_rare(inlineTokens) {
-  var i, token, inside_autolink = 0;
+function replace_rare(inlineTokens:Token[]) {
+  let token:Token, inside_autolink:number = 0;
 
-  for (i = inlineTokens.length - 1; i >= 0; i--) {
+  for (let i = inlineTokens.length - 1; i >= 0; i--) {
     token = inlineTokens[i];
 
     if (token.type === 'text' && !inside_autolink) {
@@ -86,12 +89,10 @@ function replace_rare(inlineTokens) {
 }
 
 
-module.exports = function replace(state) {
-  var blkIdx;
-
+export = function replace(state:State) {
   if (!state.md.options.typographer) { return; }
 
-  for (blkIdx = state.tokens.length - 1; blkIdx >= 0; blkIdx--) {
+  for (let blkIdx = state.tokens.length - 1; blkIdx >= 0; blkIdx--) {
 
     if (state.tokens[blkIdx].type !== 'inline') { continue; }
 
