@@ -9,6 +9,7 @@ const Token = require('../token');
 class StateCore {
   env: any;
   level?: number;
+  inlineMode: boolean;
 
   /** Link to parser instance */
   md: MarkdownIt;
