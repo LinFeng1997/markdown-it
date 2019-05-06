@@ -1,29 +1,51 @@
 // Convert straight quotation marks to typographic ones
 //
 'use strict';
+import Token = require('../../types/token');
+import State = require('../../types/rules_core/state_code');
+type Stack = {
+  token: number,
+  pos: number,
+  single: boolean,
+  level: number
+}
+
+const isWhiteSpace   = require('../common/utils').isWhiteSpace;
+const isPunctChar    = require('../common/utils').isPunctChar;
+const isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
+
+const QUOTE_TEST_RE = /['"]/;
+const QUOTE_RE = /['"]/g;
+const APOSTROPHE = '\u2019'; /* ’ */
 
 
-var isWhiteSpace   = require('../common/utils').isWhiteSpace;
-var isPunctChar    = require('../common/utils').isPunctChar;
-var isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
-
-var QUOTE_TEST_RE = /['"]/;
-var QUOTE_RE = /['"]/g;
-var APOSTROPHE = '\u2019'; /* ’ */
-
-
-function replaceAt(str, index, ch) {
+function replaceAt(str:string, index:number, ch:string):string {
   return str.substr(0, index) + ch + str.substr(index + 1);
 }
 
-function process_inlines(tokens, state) {
-  var i, token, text, t, pos, max, thisLevel, item, lastChar, nextChar,
-      isLastPunctChar, isNextPunctChar, isLastWhiteSpace, isNextWhiteSpace,
-      canOpen, canClose, j, isSingle, stack, openQuote, closeQuote;
+function process_inlines(tokens:Token[], state:State) {
+  let token: Token,
+    text: string,
+    t: RegExpExecArray | null,
+    pos: number,
+    max: number,
+    thisLevel: number,
+    item:Stack,
+    lastChar: number,
+    nextChar: number,
+    isLastPunctChar: boolean,
+    isNextPunctChar: boolean,
+    isLastWhiteSpace: boolean,
+    isNextWhiteSpace: boolean,
+    canOpen: boolean,
+    canClose: boolean,
+    j: number,
+    isSingle: boolean,
+    stack: Stack[] = [],
+    openQuote: string,
+    closeQuote: string;
 
-  stack = [];
-
-  for (i = 0; i < tokens.length; i++) {
+  for (let i = 0; i < tokens.length; i++) {
     token = tokens[i];
 
     thisLevel = tokens[i].level;
@@ -177,13 +199,11 @@ function process_inlines(tokens, state) {
 }
 
 
-module.exports = function smartquotes(state) {
+export = function smartquotes(state:State) {
   /*eslint max-depth:0*/
-  var blkIdx;
-
   if (!state.md.options.typographer) { return; }
 
-  for (blkIdx = state.tokens.length - 1; blkIdx >= 0; blkIdx--) {
+  for (let blkIdx = state.tokens.length - 1; blkIdx >= 0; blkIdx--) {
 
     if (state.tokens[blkIdx].type !== 'inline' ||
         !QUOTE_TEST_RE.test(state.tokens[blkIdx].content)) {

@@ -85,7 +85,7 @@ declare module MarkdownIt {
         langPrefix?: string;
         linkify?: boolean;
         typographer?: boolean;
-        quotes?: string;
+        quotes: string;
         highlight?: (str: string, lang: string) => void;
     }
 
