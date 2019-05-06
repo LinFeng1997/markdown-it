@@ -1,6 +1,4 @@
-export = Token;
-
-declare class Token {
+export default class Token {
     constructor(type: string, tag: string, nesting: number);
     attrGet: (name: string) => string | null;
     attrIndex: (name: string) => number;

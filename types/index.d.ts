@@ -10,7 +10,7 @@ import ParserInline = require('./parser_inline');
 
 import Renderer = require('./renderer');
 import Ruler = require('./ruler');
-import Token = require('./token');
+import Token from './token';
 
 export = MarkdownIt;
 export as namespace markdownit;

@@ -1,6 +1,6 @@
 import MarkdownIt = require(".");
 import Ruler = require("./ruler");
-import Token = require("./token");
+import Token from "./token";
 
 export = ParserCore;
 

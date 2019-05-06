@@ -1,6 +1,6 @@
 'use strict';
 import State = require('../../types/rules_core/state_code');
-import Token = require('../../types/token');
+import Token from '../../types/token';
 
 export = function inline(state: State) {
   let tokens: Token[] = state.tokens, tok;

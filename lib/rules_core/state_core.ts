@@ -1,7 +1,7 @@
 // Core state object
 //
 'use strict';
-import TokenType = require('../../types/token');
+import TokenType from '../../types/token';
 import MarkdownIt = require("../../types");
 //
 const Token = require('../token');

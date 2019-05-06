@@ -1,7 +1,7 @@
 // Convert straight quotation marks to typographic ones
 //
 'use strict';
-import Token = require('../../types/token');
+import Token from '../../types/token';
 import State = require('../../types/rules_core/state_code');
 type Stack = {
   token: number,
