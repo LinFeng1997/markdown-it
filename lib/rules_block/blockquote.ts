@@ -1,34 +1,36 @@
 // Block quotes
 
 'use strict';
+import StateBlock = require('../../types/rules_block/state_block');
+import { RuleBlock } from "../../types";
+import Token from "../../types/token";
 
-var isSpace = require('../common/utils').isSpace;
+const isSpace = require('../common/utils').isSpace;
 
-
-module.exports = function blockquote(state, startLine, endLine, silent) {
-  var adjustTab,
-      ch,
-      i,
-      initial,
-      l,
-      lastLineEmpty,
-      lines,
-      nextLine,
-      offset,
-      oldBMarks,
-      oldBSCount,
-      oldIndent,
-      oldParentType,
-      oldSCount,
-      oldTShift,
-      spaceAfterMarker,
-      terminate,
-      terminatorRules,
-      token,
-      wasOutdented,
-      oldLineMax = state.lineMax,
-      pos = state.bMarks[startLine] + state.tShift[startLine],
-      max = state.eMarks[startLine];
+module.exports = function blockquote(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean {
+  let adjustTab: boolean = false,
+    ch: number,
+    i: number,
+    initial: number,
+    l: number,
+    lastLineEmpty: boolean,
+    lines: number[],
+    nextLine: number,
+    offset: number,
+    oldBMarks: number[],
+    oldBSCount: number[],
+    oldIndent: number,
+    oldParentType: 'blockquote' | 'list' | 'root' | 'paragraph' | 'reference',
+    oldSCount: number[],
+    oldTShift: number[],
+    spaceAfterMarker: boolean,
+    terminate: boolean,
+    terminatorRules: RuleBlock[],
+    token: Token,
+    wasOutdented: boolean,
+    oldLineMax: number = state.lineMax,
+    pos: number = state.bMarks[startLine] + state.tShift[startLine],
+    max: number = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }

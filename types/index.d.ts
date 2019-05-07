@@ -90,7 +90,7 @@ declare module MarkdownIt {
     }
 
     interface Rule<S extends State = State> {
-        (state: S, silent?: boolean): boolean | void;
+        (state: S, nextLine: number, endLine: number, silent?: boolean): boolean | void;
     }
 
     interface RuleInline extends Rule<StateInline> {}
