@@ -2,7 +2,7 @@
 
 'use strict';
 
-import State = require('../../types/rules_core/state_code');
+import State from '../../types/rules_core/state_core';
 
 const NEWLINES_RE = /\r[\n\u0085]?|[\u2424\u2028\u0085]/g;
 const NULL_RE = /\u0000/g;

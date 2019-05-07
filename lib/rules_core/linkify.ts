@@ -4,7 +4,7 @@
 //
 'use strict';
 
-import State = require('../../types/rules_core/state_code');
+import State from '../../types/rules_core/state_core';
 import Token from '../../types/token';
 
 const arrayReplaceAt = require('../common/utils').arrayReplaceAt;

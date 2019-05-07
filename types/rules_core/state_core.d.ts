@@ -1,9 +1,7 @@
 import MarkdownIt = require("..");
 import Token from "../token";
 
-export = StateCore;
-
-declare class StateCore {
+export default class StateCore {
     env: any;
     level: number;
 

@@ -1,5 +1,5 @@
 import MarkdownIt = require("..");
-import State = require("../rules_core/state_core");
+import State from "../rules_core/state_core";
 import Token from "../token";
 
 export = StateInline;

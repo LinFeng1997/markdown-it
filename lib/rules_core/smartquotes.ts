@@ -2,7 +2,7 @@
 //
 'use strict';
 import Token from '../../types/token';
-import State = require('../../types/rules_core/state_code');
+import State from '../../types/rules_core/state_core';
 type Stack = {
   token: number,
   pos: number,
