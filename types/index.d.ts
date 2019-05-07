@@ -1,6 +1,6 @@
 import { LinkifyIt } from 'linkify-it'
 
-import State = require('./rules_core/state_core');
+import State from './rules_core/state_core';
 import StateBlock = require('./rules_block/state_block');
 import StateInline = require('./rules_inline/state_inline');
 
