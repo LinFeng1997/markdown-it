@@ -18,8 +18,6 @@ class StateCore {
   src: string;
 
   tokens: TokenType[];
-  /** Return any for a yet untyped property */
-  [undocumented: string]: any;
   constructor(src: string, md: MarkdownIt, env: any) {
     this.src = src;
     this.env = env;

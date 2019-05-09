@@ -2,11 +2,11 @@
 
 'use strict';
 
-import StateBlock from '../../types/rules_block/state_block';
+import StateBlock from "./state_block";
 import Token from "../../types/token";
 
-module.exports = function code(state:StateBlock, startLine:number, endLine:number/*, silent*/) {
-  let nextLine:number, last:number, token:Token;
+module.exports = function code(state:StateBlock, startLine: number, endLine: number/*, silent*/) {
+  let nextLine: number, last: number, token: Token;
 
   if (state.sCount[startLine] - state.blkIndent < 4) { return false; }
 

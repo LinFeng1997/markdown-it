@@ -2,7 +2,7 @@
 
 'use strict';
 
-import StateBlock from "../../types/rules_block/state_block";
+import StateBlock from "./state_block";
 import Token from "../../types/token";
 
 const isSpace = require('../common/utils').isSpace;

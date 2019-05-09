@@ -1,7 +1,7 @@
 // fences (``` lang, ~~~ lang)
 
 'use strict';
-import StateBlock from '../../types/rules_block/state_block';
+import StateBlock from "./state_block";
 import Token from "../../types/token";
 
 module.exports = function fence(state: StateBlock, startLine: number, endLine: number, silent: boolean) {
