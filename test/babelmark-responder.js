@@ -15,6 +15,12 @@ describe('babelmark responder app', function () {
       {
         cwd: __dirname,
         env: Object.assign({}, process.env, { PORT: PORT })
+      },
+      (error, stdout) => {
+        if (error) {
+          throw error;
+        }
+        console.log(stdout);
       }
     );
 

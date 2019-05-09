@@ -4,7 +4,7 @@
 /* eslint-disable no-console */
 'use strict';
 
-const md  = require('../')('commonmark');
+const md  = require('../index.ts')('commonmark');
 const app = require('express')();
 
 const version = require('../package.json').version;
