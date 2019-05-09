@@ -1,14 +1,19 @@
 // Horizontal rule
 
 'use strict';
-
+import StateBlock from "./state_block";
+import { RuleBlock } from "../../types";
+import Token from "../../types/token";
 var isSpace = require('../common/utils').isSpace;
 
 
-module.exports = function hr(state, startLine, endLine, silent) {
-  var marker, cnt, ch, token,
-      pos = state.bMarks[startLine] + state.tShift[startLine],
-      max = state.eMarks[startLine];
+module.exports = function hr(state: StateBlock, startLine: number, endLine: number, silent: boolean):boolean {
+  let marker:number,
+    cnt: number,
+    ch: number,
+    token: Token,
+    pos: number = state.bMarks[startLine] + state.tShift[startLine],
+    max: number = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
