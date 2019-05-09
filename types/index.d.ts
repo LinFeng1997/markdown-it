@@ -1,7 +1,7 @@
 import { LinkifyIt } from 'linkify-it'
 
 import State from './rules_core/state_core';
-import StateBlock = require('./rules_block/state_block');
+import StateBlock from './rules_block/state_block';
 import StateInline = require('./rules_inline/state_inline');
 
 import Core = require('./parser_core');
