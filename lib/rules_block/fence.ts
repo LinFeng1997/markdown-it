@@ -1,13 +1,20 @@
 // fences (``` lang, ~~~ lang)
 
 'use strict';
+import StateBlock from '../../types/rules_block/state_block';
+import Token from "../../types/token";
 
-
-module.exports = function fence(state, startLine, endLine, silent) {
-  var marker, len, params, nextLine, mem, token, markup,
-      haveEndMarker = false,
-      pos = state.bMarks[startLine] + state.tShift[startLine],
-      max = state.eMarks[startLine];
+module.exports = function fence(state: StateBlock, startLine: number, endLine: number, silent: boolean) {
+  let marker: number,
+    len: number,
+    params: string,
+    nextLine: number,
+    mem: number,
+    token: Token,
+    markup: string,
+    haveEndMarker: boolean = false,
+    pos: number = state.bMarks[startLine] + state.tShift[startLine],
+    max: number = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }

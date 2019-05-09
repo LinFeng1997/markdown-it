@@ -18,4 +18,9 @@ export default class StateBlock extends State {
     line: number;
     lineMax: number;
     tight: boolean;
+
+    skipChars(pos: number, marker: number): number
+    skipSpaces(pos: number): number
+    getLines(begin: number, end: number, indent: number, keepLastLF: boolean): string
+    push(type: string, tag: string, nesting: number): Token
 }
