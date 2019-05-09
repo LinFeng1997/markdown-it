@@ -1,7 +1,7 @@
 // Block quotes
 
 'use strict';
-import StateBlock = require('../../types/rules_block/state_block');
+import StateBlock from '../../types/rules_block/state_block';
 import { RuleBlock } from "../../types";
 import Token from "../../types/token";
 
