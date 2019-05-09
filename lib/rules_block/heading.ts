@@ -2,13 +2,18 @@
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
+import StateBlock from "../../types/rules_block/state_block";
+import Token from "../../types/token";
 
+const isSpace = require('../common/utils').isSpace;
 
-module.exports = function heading(state, startLine, endLine, silent) {
-  var ch, level, tmp, token,
-      pos = state.bMarks[startLine] + state.tShift[startLine],
-      max = state.eMarks[startLine];
+module.exports = function heading(state: StateBlock, startLine: number, endLine: number, silent: boolean) {
+  let ch: number,
+      level: number,
+      tmp: number,
+      token: Token,
+      pos: number = state.bMarks[startLine] + state.tShift[startLine],
+      max: number = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
