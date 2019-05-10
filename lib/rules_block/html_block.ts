@@ -3,13 +3,16 @@
 'use strict';
 
 
-var block_names = require('../common/html_blocks');
-var HTML_OPEN_CLOSE_TAG_RE = require('../common/html_re').HTML_OPEN_CLOSE_TAG_RE;
+import StateBlock from "./state_block";
+import Token from "../../types/token";
+
+const block_names: string[] = require('../common/html_blocks');
+const HTML_OPEN_CLOSE_TAG_RE: RegExp = require('../common/html_re').HTML_OPEN_CLOSE_TAG_RE;
 
 // An array of opening and corresponding closing sequences for html tags,
 // last argument defines whether it can terminate a paragraph or not
 //
-var HTML_SEQUENCES = [
+const HTML_SEQUENCES: [RegExp, RegExp, boolean][] = [
   [ /^<(script|pre|style)(?=(\s|>|$))/i, /<\/(script|pre|style)>/i, true ],
   [ /^<!--/,        /-->/,   true ],
   [ /^<\?/,         /\?>/,   true ],
@@ -20,10 +23,13 @@ var HTML_SEQUENCES = [
 ];
 
 
-module.exports = function html_block(state, startLine, endLine, silent) {
-  var i, nextLine, token, lineText,
-      pos = state.bMarks[startLine] + state.tShift[startLine],
-      max = state.eMarks[startLine];
+module.exports = function html_block(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean  {
+  let i: number,
+    nextLine: number,
+    token: Token,
+    lineText: string,
+    pos: number = state.bMarks[startLine] + state.tShift[startLine],
+    max: number = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
