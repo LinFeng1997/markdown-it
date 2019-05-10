@@ -2,14 +2,19 @@
 
 'use strict';
 
+import StateBlock from "./state_block";
+import Token from "../../types/token";
 
-module.exports = function paragraph(state, startLine/*, endLine*/) {
-  var content, terminate, i, l, token, oldParentType,
-      nextLine = startLine + 1,
-      terminatorRules = state.md.block.ruler.getRules('paragraph'),
-      endLine = state.lineMax;
+module.exports = function paragraph(state:StateBlock, startLine: number/*, endLine*/) {
+  let content: string,
+    i: number,
+    l: number,
+    token: Token,
+    nextLine: number = startLine + 1,
+    terminatorRules = state.md.block.ruler.getRules('paragraph'),
+    endLine = state.lineMax;
 
-  oldParentType = state.parentType;
+  let oldParentType = state.parentType;
   state.parentType = 'paragraph';
 
   // jump line-by-line until empty one or EOF
@@ -22,7 +27,7 @@ module.exports = function paragraph(state, startLine/*, endLine*/) {
     if (state.sCount[nextLine] < 0) { continue; }
 
     // Some tags can terminate paragraph without empty line.
-    terminate = false;
+    let terminate = false;
     for (i = 0, l = terminatorRules.length; i < l; i++) {
       if (terminatorRules[i](state, nextLine, endLine, true)) {
         terminate = true;
