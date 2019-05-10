@@ -1,31 +1,27 @@
 'use strict';
 
+import StateBlock from "./state_block";
 
-var normalizeReference   = require('../common/utils').normalizeReference;
-var isSpace              = require('../common/utils').isSpace;
+const normalizeReference   = require('../common/utils').normalizeReference;
+const isSpace              = require('../common/utils').isSpace;
 
 
-module.exports = function reference(state, startLine, _endLine, silent) {
-  var ch,
-      destEndPos,
-      destEndLineNo,
-      endLine,
-      href,
-      i,
-      l,
-      label,
-      labelEnd,
-      oldParentType,
-      res,
-      start,
-      str,
-      terminate,
-      terminatorRules,
-      title,
-      lines = 0,
-      pos = state.bMarks[startLine] + state.tShift[startLine],
-      max = state.eMarks[startLine],
-      nextLine = startLine + 1;
+module.exports = function reference(state:StateBlock, startLine:number, _endLine:number, silent:boolean) {
+    let ch: number,
+        destEndPos: number,
+        destEndLineNo: number,
+        endLine: number,
+        i: number,
+        l: number,
+        label: number,
+        labelEnd: number = 0,
+        start: number,
+        str: string,
+        title: string,
+        lines: number = 0,
+        pos: number = state.bMarks[startLine] + state.tShift[startLine],
+        max: number = state.eMarks[startLine],
+        nextLine = startLine + 1;
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
@@ -46,9 +42,9 @@ module.exports = function reference(state, startLine, _endLine, silent) {
   endLine = state.lineMax;
 
   // jump line-by-line until empty one or EOF
-  terminatorRules = state.md.block.ruler.getRules('reference');
+  let terminatorRules = state.md.block.ruler.getRules('reference');
 
-  oldParentType = state.parentType;
+  let oldParentType = state.parentType;
   state.parentType = 'reference';
 
   for (; nextLine < endLine && !state.isEmpty(nextLine); nextLine++) {
@@ -60,7 +56,7 @@ module.exports = function reference(state, startLine, _endLine, silent) {
     if (state.sCount[nextLine] < 0) { continue; }
 
     // Some tags can terminate paragraph without empty line.
-    terminate = false;
+    let terminate = false;
     for (i = 0, l = terminatorRules.length; i < l; i++) {
       if (terminatorRules[i](state, nextLine, endLine, true)) {
         terminate = true;
@@ -107,10 +103,10 @@ module.exports = function reference(state, startLine, _endLine, silent) {
 
   // [label]:   destination   'title'
   //            ^^^^^^^^^^^ parse this
-  res = state.md.helpers.parseLinkDestination(str, pos, max);
+  let res = state.md.helpers.parseLinkDestination(str, pos, max);
   if (!res.ok) { return false; }
 
-  href = state.md.normalizeLink(res.str);
+  let href = state.md.normalizeLink(res.str);
   if (!state.md.validateLink(href)) { return false; }
 
   pos = res.pos;
