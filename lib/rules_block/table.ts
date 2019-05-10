@@ -1,26 +1,28 @@
 // GFM table, non-standard
 
 'use strict';
+import StateBlock from "./state_block";
+import Token from "../../types/token";
 
-var isSpace = require('../common/utils').isSpace;
+const isSpace = require('../common/utils').isSpace;
 
 
-function getLine(state, line) {
-  var pos = state.bMarks[line] + state.blkIndent,
-      max = state.eMarks[line];
+function getLine(state: StateBlock, line: number): string {
+    let pos: number = state.bMarks[line] + state.blkIndent,
+        max: number = state.eMarks[line];
 
-  return state.src.substr(pos, max - pos);
+    return state.src.substr(pos, max - pos);
 }
 
-function escapedSplit(str) {
-  var result = [],
-      pos = 0,
-      max = str.length,
-      ch,
-      escapes = 0,
-      lastPos = 0,
-      backTicked = false,
-      lastBackTick = 0;
+function escapedSplit(str = '') {
+    let result: string[] = [],
+        pos = 0,
+        max = str.length,
+        ch: number,
+        escapes = 0,
+        lastPos = 0,
+        backTicked = false,
+        lastBackTick = 0;
 
   ch  = str.charCodeAt(pos);
 
@@ -64,9 +66,19 @@ function escapedSplit(str) {
 }
 
 
-module.exports = function table(state, startLine, endLine, silent) {
-  var ch, lineText, pos, i, nextLine, columns, columnCount, token,
-      aligns, t, tableLines, tbodyLines;
+module.exports = function table(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean  {
+    let ch: number,
+        pos: number,
+        i: number,
+        nextLine: number,
+        columns: string[],
+        columnCount: number,
+        token: Token,
+
+        aligns: string[],
+        t: string,
+        tableLines: number[],
+        tbodyLines: number[];
 
   // should have at least two lines
   if (startLine + 2 > endLine) { return false; }
@@ -96,7 +108,7 @@ module.exports = function table(state, startLine, endLine, silent) {
     pos++;
   }
 
-  lineText = getLine(state, startLine + 1);
+  let lineText = getLine(state, startLine + 1);
 
   columns = lineText.split('|');
   aligns = [];
