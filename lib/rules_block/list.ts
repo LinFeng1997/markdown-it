@@ -2,13 +2,17 @@
 
 'use strict';
 
-var isSpace = require('../common/utils').isSpace;
-
+import StateBlock from "./state_block";
+import Token from "../../types/token";
+const isSpace = require('../common/utils').isSpace;
 
 // Search `[-+*][\n ]`, returns next pos after marker on success
 // or -1 on fail.
-function skipBulletListMarker(state, startLine) {
-  var marker, pos, max, ch;
+function skipBulletListMarker(state: StateBlock, startLine: number): number {
+  let marker:number,
+    pos: number,
+    max: number,
+    ch: number;
 
   pos = state.bMarks[startLine] + state.tShift[startLine];
   max = state.eMarks[startLine];
@@ -35,11 +39,11 @@ function skipBulletListMarker(state, startLine) {
 
 // Search `\d+[.)][\n ]`, returns next pos after marker on success
 // or -1 on fail.
-function skipOrderedListMarker(state, startLine) {
-  var ch,
-      start = state.bMarks[startLine] + state.tShift[startLine],
-      pos = start,
-      max = state.eMarks[startLine];
+function skipOrderedListMarker(state: StateBlock, startLine: number): number {
+  let ch: number,
+    start: number = state.bMarks[startLine] + state.tShift[startLine],
+    pos: number = start,
+    max: number = state.eMarks[startLine];
 
   // List marker should have at least 2 chars (digit + dot)
   if (pos + 1 >= max) { return -1; }
@@ -83,11 +87,10 @@ function skipOrderedListMarker(state, startLine) {
   return pos;
 }
 
-function markTightParagraphs(state, idx) {
-  var i, l,
-      level = state.level + 2;
+function markTightParagraphs(state: StateBlock, idx: number) {
+  let level = state.level + 2;
 
-  for (i = idx + 2, l = state.tokens.length - 2; i < l; i++) {
+  for (let i = idx + 2, l = state.tokens.length - 2; i < l; i++) {
     if (state.tokens[i].level === level && state.tokens[i].type === 'paragraph_open') {
       state.tokens[i + 2].hidden = true;
       state.tokens[i].hidden = true;
@@ -97,37 +100,34 @@ function markTightParagraphs(state, idx) {
 }
 
 
-module.exports = function list(state, startLine, endLine, silent) {
-  var ch,
-      contentStart,
-      i,
-      indent,
-      indentAfterMarker,
-      initial,
-      isOrdered,
-      itemLines,
-      l,
-      listLines,
-      listTokIdx,
-      markerCharCode,
-      markerValue,
-      max,
-      nextLine,
-      offset,
-      oldIndent,
-      oldLIndent,
-      oldParentType,
-      oldTShift,
-      oldTight,
-      pos,
-      posAfterMarker,
-      prevEmptyEnd,
-      start,
-      terminate,
-      terminatorRules,
-      token,
-      isTerminatingParagraph = false,
-      tight = true;
+module.exports = function list(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean {
+  let ch: number,
+    contentStart: number,
+    i: number,
+    indent: number,
+    indentAfterMarker: number,
+    initial: number,
+    isOrdered: boolean,
+    itemLines: number[],
+    l: number,
+    listLines: number[],
+    listTokIdx: number,
+    markerCharCode: number,
+    markerValue: number = 0,
+    max: number,
+    nextLine: number,
+    offset: number,
+    oldIndent: number,
+    oldLIndent: number,
+    oldTShift: number,
+    oldTight: boolean,
+    pos: number,
+    posAfterMarker: number,
+    prevEmptyEnd: boolean,
+    start: number,
+    token: Token,
+    isTerminatingParagraph: boolean = false,
+    tight: boolean = true;
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
@@ -180,7 +180,7 @@ module.exports = function list(state, startLine, endLine, silent) {
   if (isOrdered) {
     token       = state.push('ordered_list_open', 'ol', 1);
     if (markerValue !== 1) {
-      token.attrs = [ [ 'start', markerValue ] ];
+      token.attrs = [ [ 'start', String(markerValue) ] ];
     }
 
   } else {
@@ -196,9 +196,9 @@ module.exports = function list(state, startLine, endLine, silent) {
 
   nextLine = startLine;
   prevEmptyEnd = false;
-  terminatorRules = state.md.block.ruler.getRules('list');
+  let terminatorRules = state.md.block.ruler.getRules('list');
 
-  oldParentType = state.parentType;
+  let oldParentType = state.parentType;
   state.parentType = 'list';
 
   while (nextLine < endLine) {
@@ -293,7 +293,7 @@ module.exports = function list(state, startLine, endLine, silent) {
     if (state.sCount[nextLine] < state.blkIndent) { break; }
 
     // fail if terminating block found
-    terminate = false;
+    let terminate = false;
     for (i = 0, l = terminatorRules.length; i < l; i++) {
       if (terminatorRules[i](state, nextLine, endLine, true)) {
         terminate = true;

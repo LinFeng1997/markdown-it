@@ -7,5 +7,5 @@ export = ParserBlock;
 declare class ParserBlock {
     parse(src: string, md: MarkdownIt, env: any, outTokens: Token[]): void;
     ruler: MarkdownIt.RulerBlock;
-    tokenize: (state: State, startLine: number, nextLine: number) => void
+    tokenize: (state: State, startLine: number, nextLine: number,slient?:boolean) => void
 }
