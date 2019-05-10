@@ -3,10 +3,22 @@
 'use strict';
 
 
-module.exports = function lheading(state, startLine, endLine/*, silent*/) {
-  var content, terminate, i, l, token, pos, max, level, marker,
-      nextLine = startLine + 1, oldParentType,
-      terminatorRules = state.md.block.ruler.getRules('paragraph');
+import StateBlock from "./state_block";
+import Token from "../../types/token";
+
+module.exports = function lheading(state: StateBlock, startLine: number, endLine: number, /* silent: boolean */): boolean {
+  let content,
+    terminate,
+    i: number,
+    l: number,
+    token: Token,
+    pos: number,
+    max: number,
+    level: number = 0,
+    marker: number = 0,
+    nextLine: number = startLine + 1,
+    oldParentType: StateBlock['parentType'],
+    terminatorRules = state.md.block.ruler.getRules('paragraph');
 
   // if it's indented more than 3 spaces, it should be a code block
   if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
