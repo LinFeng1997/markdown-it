@@ -2,6 +2,8 @@
 
 'use strict';
 
+import StateInline from "./state_inline";
+import Token = require("../token");
 
 var HTML_TAG_RE = require('../common/html_re').HTML_TAG_RE;
 
@@ -13,8 +15,12 @@ function isLetter(ch) {
 }
 
 
-module.exports = function html_inline(state, silent) {
-  var ch, match, max, token,
+module.exports = function html_inline(state: StateInline, silent: boolean): boolean {
+  let ch: number,
+    match: RegExpMatchArray | null,
+    max: number,
+    token: Token,
+
       pos = state.pos;
 
   if (!state.md.options.html) { return false; }
