@@ -163,5 +163,5 @@ class StateInline extends State {
 }
 
 
-
+export default StateInline;
 module.exports = StateInline;
