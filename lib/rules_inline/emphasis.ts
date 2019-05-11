@@ -1,22 +1,24 @@
 // Process *this* and _that_
 //
 'use strict';
-
+import StateInline from "./state_inline";
+import Token = require("../token");
+import MarkdownIt = require("../../index");
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
-module.exports.tokenize = function emphasis(state, silent) {
-  var i, scanned, token,
+module.exports.tokenize = function emphasis(state: StateInline, silent: boolean): boolean {
+  let token:Token,
       start = state.pos,
-      marker = state.src.charCodeAt(start);
+      marker:number = state.src.charCodeAt(start);
 
   if (silent) { return false; }
 
   if (marker !== 0x5F /* _ */ && marker !== 0x2A /* * */) { return false; }
 
-  scanned = state.scanDelims(state.pos, marker === 0x2A);
+  let scanned = state.scanDelims(state.pos, marker === 0x2A);
 
-  for (i = 0; i < scanned.length; i++) {
+  for (let i = 0; i < scanned.length; i++) {
     token         = state.push('text', '', 0);
     token.content = String.fromCharCode(marker);
 
@@ -54,8 +56,8 @@ module.exports.tokenize = function emphasis(state, silent) {
       // Boolean flags that determine if this delimiter could open or close
       // an emphasis.
       //
-      open:   scanned.can_open,
-      close:  scanned.can_close
+      open:   !!scanned.can_open,
+      close:  !!scanned.can_close
     });
   }
 
@@ -67,17 +69,16 @@ module.exports.tokenize = function emphasis(state, silent) {
 
 // Walk through delimiter list and replace text tokens with tags
 //
-module.exports.postProcess = function emphasis(state) {
-  var i,
-      startDelim,
-      endDelim,
-      token,
-      ch,
-      isStrong,
-      delimiters = state.delimiters,
-      max = state.delimiters.length;
+module.exports.postProcess = function emphasis(state: StateInline): void {
+  let startDelim: MarkdownIt.Delimiter,
+    endDelim: MarkdownIt.Delimiter,
+    token: Token,
+    ch: string,
+    isStrong: boolean,
+    delimiters = state.delimiters,
+    max: number = state.delimiters.length;
 
-  for (i = max - 1; i >= 0; i--) {
+  for (let i = max - 1; i >= 0; i--) {
     startDelim = delimiters[i];
 
     if (startDelim.marker !== 0x5F/* _ */ && startDelim.marker !== 0x2A/* * */) {
