@@ -2,6 +2,8 @@
 
 'use strict';
 
+import StateInline from "./state_inline";
+
 var entities          = require('../common/entities');
 var has               = require('../common/utils').has;
 var isValidEntityCode = require('../common/utils').isValidEntityCode;
@@ -12,8 +14,12 @@ var DIGITAL_RE = /^&#((?:x[a-f0-9]{1,8}|[0-9]{1,8}));/i;
 var NAMED_RE   = /^&([a-z][a-z0-9]{1,31});/i;
 
 
-module.exports = function entity(state, silent) {
-  var ch, code, match, pos = state.pos, max = state.posMax;
+module.exports = function entity(state: StateInline, silent: boolean): boolean {
+  let ch: number,
+    code: number,
+    match: RegExpMatchArray | null,
+    pos = state.pos,
+    max = state.posMax;
 
   if (state.src.charCodeAt(pos) !== 0x26/* & */) { return false; }
 
