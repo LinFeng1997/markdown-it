@@ -9,7 +9,7 @@ const EMAIL_RE    = /^<([a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0
 const AUTOLINK_RE = /^<([a-zA-Z][a-zA-Z0-9+.\-]{1,31}):([^<>\x00-\x20]*)>/;
 
 
-module.exports = function autolink(state: StateInline, silent: boolean) {
+module.exports = function autolink(state: StateInline, silent: boolean): boolean {
   let tail: string,
     linkMatch: RegExpMatchArray,
     emailMatch: RegExpMatchArray,

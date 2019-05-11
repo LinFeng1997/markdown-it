@@ -1,11 +1,18 @@
 // Parse backticks
 
 'use strict';
+import StateInline from "./state_inline";
+import Token = require("../token");
 
-module.exports = function backtick(state, silent) {
-  var start, max, marker, matchStart, matchEnd, token,
-      pos = state.pos,
-      ch = state.src.charCodeAt(pos);
+module.exports = function backtick(state: StateInline, silent: boolean): boolean {
+  let start: number,
+    max: number,
+    marker: string,
+    matchStart: number,
+    matchEnd: number,
+    token: Token,
+    pos: number = state.pos,
+    ch: number = state.src.charCodeAt(pos);
 
   if (ch !== 0x60/* ` */) { return false; }
 
