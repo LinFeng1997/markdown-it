@@ -42,7 +42,7 @@ export = function linkify(state:State) {
       continue;
     }
 
-    tokens = blockTokens[j].children;
+    tokens = blockTokens[j].children || [];
 
     htmlLinkLevel = 0;
 

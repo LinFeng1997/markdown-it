@@ -210,6 +210,6 @@ export = function smartquotes(state:State) {
       continue;
     }
 
-    process_inlines(state.tokens[blkIdx].children, state);
+    process_inlines(state.tokens[blkIdx].children || [], state);
   }
 };

@@ -5,14 +5,14 @@ export default class Token {
     attrJoin: (name: string, value: string) => void;
     attrPush: (attrData: string[]) => void;
     attrSet: (name: string, value: string) => void;
-    attrs: string[][];
+    attrs: string[][] | null;
     block: boolean;
-    children: Token[];
+    children: Token[] | null;
     content: string;
     hidden: boolean;
     info: string;
     level: number;
-    map: number[];
+    map: number[] | null;
     markup: string;
     meta: any;
     nesting: number;

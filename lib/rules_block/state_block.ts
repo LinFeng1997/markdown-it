@@ -4,7 +4,6 @@
 
 import MarkdownIt = require("../../types");
 import State = require('../rules_core/state_core');
-import TokenType from "../../types/token";
 
 var Token = require('../token');
 var isSpace = require('../common/utils').isSpace;
@@ -143,7 +142,7 @@ class StateBlock extends State{
   }
 
   // Push new token to "stream".
-  push(type: string, tag: string, nesting: number):TokenType {
+  push(type: string, tag: string, nesting: number):Token {
     var token = new Token(type, tag, nesting);
     token.block = true;
 
@@ -269,7 +268,7 @@ class StateBlock extends State{
   };
 
   // re-export Token class to use in block rules
-  Token:TokenType = Token
+  Token = Token
 }
 
 export default StateBlock;
