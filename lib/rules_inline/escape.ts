@@ -1,19 +1,22 @@
 // Process escaped chars and hardbreaks
 
 'use strict';
+import StateInline from "./state_inline";
 
-var isSpace = require('../common/utils').isSpace;
+const isSpace = require('../common/utils').isSpace;
 
-var ESCAPED = [];
+const ESCAPED:number[] = [];
 
-for (var i = 0; i < 256; i++) { ESCAPED.push(0); }
+for (let i = 0; i < 256; i++) { ESCAPED.push(0); }
 
 '\\!"#$%&\'()*+,./:;<=>?@[]^_`{|}~-'
   .split('').forEach(function (ch) { ESCAPED[ch.charCodeAt(0)] = 1; });
 
 
-module.exports = function escape(state, silent) {
-  var ch, pos = state.pos, max = state.posMax;
+module.exports = function escape(state: StateInline, silent:boolean):boolean {
+  let ch:number,
+      pos = state.pos,
+      max = state.posMax;
 
   if (state.src.charCodeAt(pos) !== 0x5C/* \ */) { return false; }
 
