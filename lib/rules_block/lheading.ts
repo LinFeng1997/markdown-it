@@ -4,7 +4,7 @@
 
 
 import StateBlock from "./state_block";
-import Token from "../../types/token";
+import Token = require('../token');;
 
 module.exports = function lheading(state: StateBlock, startLine: number, endLine: number, /* silent: boolean */): boolean {
   let content,

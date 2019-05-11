@@ -3,7 +3,7 @@
 'use strict';
 
 import StateBlock from "./state_block";
-import Token from "../../types/token";
+import Token = require('../token');;
 
 module.exports = function paragraph(state:StateBlock, startLine: number/*, endLine*/) {
   let content: string,

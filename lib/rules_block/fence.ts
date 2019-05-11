@@ -2,7 +2,7 @@
 
 'use strict';
 import StateBlock from "./state_block";
-import Token from "../../types/token";
+import Token = require('../token');;
 
 module.exports = function fence(state: StateBlock, startLine: number, endLine: number, silent: boolean) {
   let marker: number,

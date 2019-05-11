@@ -4,7 +4,7 @@
 
 
 import StateBlock from "./state_block";
-import Token from "../../types/token";
+import Token = require('../token');;
 
 const block_names: string[] = require('../common/html_blocks');
 const HTML_OPEN_CLOSE_TAG_RE: RegExp = require('../common/html_re').HTML_OPEN_CLOSE_TAG_RE;

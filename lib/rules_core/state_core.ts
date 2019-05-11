@@ -1,10 +1,8 @@
 // Core state object
 //
 'use strict';
-import TokenType from '../../types/token';
+import Token = require('../token');
 import MarkdownIt = require("../../types");
-//
-const Token = require('../token');
 
 class StateCore {
   env: any;
@@ -17,7 +15,7 @@ class StateCore {
   /** The markdown source code that is being parsed. */
   src: string;
 
-  tokens: TokenType[];
+  tokens: Token[];
   constructor(src: string, md: MarkdownIt, env: any) {
     this.src = src;
     this.env = env;

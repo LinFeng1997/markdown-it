@@ -12,7 +12,7 @@
 'use strict';
 
 import State from '../../types/rules_core/state_core';
-import Token from '../../types/token';
+import Token = require('../token');
 
 // TODO:
 // - fractionals 1/2, 1/4, 3/4 -> ½, ¼, ¾
