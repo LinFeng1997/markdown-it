@@ -142,7 +142,7 @@ class StateBlock extends State{
   }
 
   // Push new token to "stream".
-  push(type: string, tag: string, nesting: number):Token {
+  push(type: string, tag: string, nesting: number):typeof Token {
     var token = new Token(type, tag, nesting);
     token.block = true;
 
