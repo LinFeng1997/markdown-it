@@ -1,14 +1,23 @@
 // ~~strike through~~
 //
 'use strict';
-
+import StateInline from "./state_inline";
+import Token = require("../token");
+import MarkdownIt = require("../../index");
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
-module.exports.tokenize = function strikethrough(state, silent) {
-  var i, scanned, token, len, ch,
-      start = state.pos,
-      marker = state.src.charCodeAt(start);
+module.exports.tokenize = function strikethrough(state: StateInline, silent: boolean): boolean  {
+  let scanned:  {
+      can_open: boolean | number,
+      can_close: boolean | string,
+      length: number
+    },
+    token: Token,
+    len: number,
+    ch: string,
+    start = state.pos,
+    marker: number = state.src.charCodeAt(start);
 
   if (silent) { return false; }
 
@@ -26,7 +35,7 @@ module.exports.tokenize = function strikethrough(state, silent) {
     len--;
   }
 
-  for (i = 0; i < len; i += 2) {
+  for (let i = 0; i < len; i += 2) {
     token         = state.push('text', '', 0);
     token.content = ch + ch;
 
@@ -36,8 +45,9 @@ module.exports.tokenize = function strikethrough(state, silent) {
       token:  state.tokens.length - 1,
       level:  state.level,
       end:    -1,
-      open:   scanned.can_open,
-      close:  scanned.can_close
+      open:   !!scanned.can_open,
+      close:  !!scanned.can_close,
+      length: scanned.length
     });
   }
 
@@ -50,11 +60,12 @@ module.exports.tokenize = function strikethrough(state, silent) {
 // Walk through delimiter list and replace text tokens with tags
 //
 module.exports.postProcess = function strikethrough(state) {
-  var i, j,
-      startDelim,
-      endDelim,
-      token,
-      loneMarkers = [],
+  let i:number,
+      j:number,
+      startDelim:MarkdownIt.Delimiter,
+      endDelim:MarkdownIt.Delimiter,
+      token:Token,
+      loneMarkers:number[] = [],
       delimiters = state.delimiters,
       max = state.delimiters.length;
 
@@ -99,7 +110,7 @@ module.exports.postProcess = function strikethrough(state) {
   // So, we have to move all those markers after subsequent s_close tags.
   //
   while (loneMarkers.length) {
-    i = loneMarkers.pop();
+    i = loneMarkers.pop() || 0;
     j = i + 1;
 
     while (j < state.tokens.length && state.tokens[j].type === 's_close') {
