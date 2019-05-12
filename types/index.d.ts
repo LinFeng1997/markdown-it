@@ -87,6 +87,7 @@ declare module MarkdownIt {
         typographer?: boolean;
         quotes: string;
         highlight?: (str: string, lang: string) => void;
+        maxNesting: number;
     }
 
     interface Rule<S extends State = State> {

@@ -7,6 +7,7 @@
 'use strict';
 
 import RulerType from './ruler';
+import State from '../types/rules_core/state_core';
 const Ruler = require('./ruler');
 
 var _rules = [
@@ -42,7 +43,7 @@ class Core {
    *
    * Executes core chain rules.
    **/
-  process(state) {
+  process(state: State) {
     let rules = this.ruler.getRules('');
 
     for (let i = 0, l = rules.length; i < l; i++) {
