@@ -1,28 +1,38 @@
 // Process ![image](<src> "title")
 
 'use strict';
+import StateInline from "./state_inline";
+import Token = require("../token");
 
 var normalizeReference   = require('../common/utils').normalizeReference;
 var isSpace              = require('../common/utils').isSpace;
 
 
-module.exports = function image(state, silent) {
-  var attrs,
-      code,
-      content,
-      label,
-      labelEnd,
-      labelStart,
-      pos,
-      ref,
-      res,
-      title,
-      token,
-      tokens,
-      start,
-      href = '',
-      oldPos = state.pos,
-      max = state.posMax;
+module.exports = function image(state: StateInline, silent: boolean): boolean {
+  let attrs: string[][],
+    code: number,
+    content: string,
+    label: string = '',
+    labelEnd: number,
+    labelStart: number,
+    pos: number,
+    ref: {
+      href: string,
+      title: string
+    },
+    res: {
+      ok: boolean,
+      pos: null,
+      lines: null,
+      str: string
+    },
+    title: string,
+    token: Token,
+    tokens: Token[],
+    start: number,
+    href = '',
+    oldPos = state.pos,
+    max = state.posMax;
 
   if (state.src.charCodeAt(state.pos) !== 0x21/* ! */) { return false; }
   if (state.src.charCodeAt(state.pos + 1) !== 0x5B/* [ */) { return false; }
@@ -51,7 +61,7 @@ module.exports = function image(state, silent) {
     // [link](  <href>  "title"  )
     //          ^^^^^^ parsing link destination
     start = pos;
-    res = state.md.helpers.parseLinkDestination(state.src, pos, state.posMax);
+    let res = state.md.helpers.parseLinkDestination(state.src, pos, state.posMax);
     if (res.ok) {
       href = state.md.normalizeLink(res.str);
       if (state.md.validateLink(href)) {
