@@ -356,4 +356,5 @@ class Ruler<S extends State = State> {
   };
 }
 
+export default Ruler;
 module.exports = Ruler;

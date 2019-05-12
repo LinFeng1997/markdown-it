@@ -6,9 +6,8 @@
  **/
 'use strict';
 
-
-var Ruler  = require('./ruler');
-
+import RulerType from './ruler';
+const Ruler = require('./ruler');
 
 var _rules = [
   [ 'normalize',      require('./rules_core/normalize')      ],
@@ -23,36 +22,35 @@ var _rules = [
 /**
  * new Core()
  **/
-function Core() {
+class Core {
+  ruler: RulerType;
   /**
    * Core#ruler -> Ruler
    *
    * [[Ruler]] instance. Keep configuration of core rules.
    **/
-  this.ruler = new Ruler();
+  constructor(){
+    this.ruler = new Ruler();
 
-  for (var i = 0; i < _rules.length; i++) {
-    this.ruler.push(_rules[i][0], _rules[i][1]);
+    for (let i = 0; i < _rules.length; i++) {
+      this.ruler.push(_rules[i][0], _rules[i][1]);
+    }
   }
+
+  /**
+   * Core.process(state)
+   *
+   * Executes core chain rules.
+   **/
+  process(state) {
+    let rules = this.ruler.getRules('');
+
+    for (let i = 0, l = rules.length; i < l; i++) {
+      rules[i](state);
+    }
+  };
+
+  State = require('./rules_core/state_core');
 }
-
-
-/**
- * Core.process(state)
- *
- * Executes core chain rules.
- **/
-Core.prototype.process = function (state) {
-  var i, l, rules;
-
-  rules = this.ruler.getRules('');
-
-  for (i = 0, l = rules.length; i < l; i++) {
-    rules[i](state);
-  }
-};
-
-Core.prototype.State = require('./rules_core/state_core');
-
 
 module.exports = Core;
