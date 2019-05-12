@@ -1,13 +1,14 @@
 // Merge adjacent text nodes into one, and re-calculate all token levels
 //
 'use strict';
+import StateInline from "./state_inline";
 
-
-module.exports = function text_collapse(state) {
-  var curr, last,
-      level = 0,
-      tokens = state.tokens,
-      max = state.tokens.length;
+module.exports = function text_collapse(state: StateInline): void {
+  let curr: number,
+    last: number,
+    level = 0,
+    tokens = state.tokens,
+    max: number = state.tokens.length;
 
   for (curr = last = 0; curr < max; curr++) {
     // re-calculate levels
