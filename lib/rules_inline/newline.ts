@@ -1,12 +1,14 @@
 // Proceess '\n'
 
 'use strict';
+import StateInline from "./state_inline";
 
 var isSpace = require('../common/utils').isSpace;
 
-
-module.exports = function newline(state, silent) {
-  var pmax, max, pos = state.pos;
+module.exports = function newline(state: StateInline, silent: boolean): boolean {
+  let pmax: number,
+    max: number,
+    pos: number = state.pos;
 
   if (state.src.charCodeAt(pos) !== 0x0A/* \n */) { return false; }
 
