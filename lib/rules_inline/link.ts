@@ -1,27 +1,36 @@
 // Process [link](<to> "stuff")
 
 'use strict';
+import StateInline from "./state_inline";
+import Token = require("../token");
 
 var normalizeReference   = require('../common/utils').normalizeReference;
 var isSpace              = require('../common/utils').isSpace;
 
 
-module.exports = function link(state, silent) {
-  var attrs,
-      code,
-      label,
-      labelEnd,
-      labelStart,
-      pos,
-      res,
-      ref,
-      title,
-      token,
-      href = '',
-      oldPos = state.pos,
-      max = state.posMax,
-      start = state.pos,
-      parseReference = true;
+module.exports = function link(state: StateInline, silent: boolean): boolean {
+  let attrs: string[][],
+    code: number,
+    label: string = '',
+    labelEnd: number,
+    labelStart: number,
+    pos: number,
+    res: {
+      ok: boolean,
+      pos: number,
+      str: string
+    },
+    ref: {
+      href: string,
+      title: string
+    },
+    title: string = '',
+    token: Token,
+    href = '',
+    oldPos = state.pos,
+    max = state.posMax,
+    start = state.pos,
+    parseReference = true;
 
   if (state.src.charCodeAt(state.pos) !== 0x5B/* [ */) { return false; }
 
