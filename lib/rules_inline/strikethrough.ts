@@ -3,7 +3,7 @@
 'use strict';
 import StateInline from "./state_inline";
 import Token = require("../token");
-import MarkdownIt = require("../../index");
+import MarkdownIt = require("../../types/index");
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //

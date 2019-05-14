@@ -2,7 +2,7 @@
 //
 'use strict';
 import StateInline from "./state_inline";
-import MarkdownIt = require("../../index");
+import MarkdownIt = require("../../types/index");
 
 module.exports = function link_pairs(state: StateInline): void {
     let lastDelim: MarkdownIt.Delimiter,

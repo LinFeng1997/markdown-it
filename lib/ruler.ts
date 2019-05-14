@@ -18,14 +18,19 @@
 'use strict';
 
 
-import State = require("./rules_core/state_core");
-import MarkdownIt = require("../index");
+import State from "../types/rules_core/state_core";
+import * as MarkdownIt from '../types/index';
 
 /**
  * new Ruler()
  **/
 class Ruler<S extends State = State> {
-  __rules__: MarkdownIt.Rule<S>[];
+  __rules__: {
+      name: string;
+      enabled: boolean;
+      alt: string[];
+      fn: MarkdownIt.Rule<S>;
+  }[];
   __cache__: {
     [key: string]: MarkdownIt.Rule<S>[];
   } | null;
@@ -168,7 +173,7 @@ class Ruler<S extends State = State> {
       name: ruleName,
       enabled: true,
       fn: fn,
-      alt: opt.alt || []
+      alt: opt.alt || [],
     });
 
     this.__cache__ = null;
