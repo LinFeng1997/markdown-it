@@ -2,6 +2,8 @@
 
 'use strict';
 import MarkdownItConstructor = require("../types/index");
+import { Options } from '../types/index';
+import Token = require("./token");
 
 var utils        = require('./common/utils');
 var helpers      = require('./helpers');
@@ -379,7 +381,7 @@ class MarkdownIt implements MarkdownItConstructor{
    * But you will not need it with high probability. See also comment
    * in [[MarkdownIt.parse]].
    **/
-  render (src, env) {
+  render(src: string, env: any): string {
     env = env || {};
 
     return this.renderer.render(this.parse(src, env), this.options, env);
@@ -405,7 +407,7 @@ class MarkdownIt implements MarkdownItConstructor{
    * it's best to create multiple instances and initialize each with separate
    * config.
    **/
-  set(options) {
+  set(options: Options): MarkdownIt {
     utils.assign(this.options, options);
     return this;
   };
@@ -421,7 +423,7 @@ class MarkdownIt implements MarkdownItConstructor{
    * We strongly recommend to use presets instead of direct config loads. That
    * will give better compatibility with next versions.
    **/
-  configure(presets) {
+  configure(presets: { options: Options, components: {} }) {
     var self = this, presetName;
 
     if (utils.isString(presets)) {
@@ -465,7 +467,7 @@ class MarkdownIt implements MarkdownItConstructor{
    *             .disable('smartquotes');
    * ```
    **/
-  enable(list, ignoreInvalid) {
+  enable(list: string[], ignoreInvalid: boolean): MarkdownIt {
     var result: string[] = [];
 
     if (!Array.isArray(list)) { list = [ list ]; }
@@ -493,7 +495,7 @@ class MarkdownIt implements MarkdownItConstructor{
    *
    * The same as [[MarkdownIt.enable]], but turn specified rules off.
    **/
-  disable(list, ignoreInvalid) {
+  disable(list: string[], ignoreInvalid: boolean): MarkdownIt {
     var result: string[] = [];
 
     if (!Array.isArray(list)) { list = [ list ]; }
@@ -551,7 +553,7 @@ class MarkdownIt implements MarkdownItConstructor{
    * inject data in specific cases. Usually, you will be ok to pass `{}`,
    * and then pass updated object to renderer.
    **/
-  parse(src, env) {
+  parse(src: string, env: any): Token[] {
     if (typeof src !== 'string') {
       throw new Error('Input data should be a String');
     }
@@ -573,7 +575,7 @@ class MarkdownIt implements MarkdownItConstructor{
    * block tokens list with the single `inline` element, containing parsed inline
    * tokens in `children` property. Also updates `env` object.
    **/
-  parseInline(src, env) {
+  parseInline(src: string, env: any): Token[] {
     var state = new this.core.State(src, this, env);
 
     state.inlineMode = true;
@@ -591,7 +593,7 @@ class MarkdownIt implements MarkdownItConstructor{
    * Similar to [[MarkdownIt.render]] but for single paragraph content. Result
    * will NOT be wrapped into `<p>` tags.
    **/
-  renderInline(src, env) {
+  renderInline(src: string, env: any): string {
     env = env || {};
 
     return this.renderer.render(this.parseInline(src, env), this.options, env);
