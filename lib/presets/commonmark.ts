@@ -1,12 +1,12 @@
-// markdown-it default options
+// Commonmark default options
 
 'use strict';
+import {Preset} from '../../types/index';
 
-
-module.exports = {
+const preset: Preset = {
   options: {
-    html:         false,        // Enable HTML tags in source
-    xhtmlOut:     false,        // Use '/' to close single tags (<br />)
+    html:         true,         // Enable HTML tags in source
+    xhtmlOut:     true,         // Use '/' to close single tags (<br />)
     breaks:       false,        // Convert '\n' in paragraphs into <br>
     langPrefix:   'language-',  // CSS language prefix for fenced blocks
     linkify:      false,        // autoconvert URL-like texts to links
@@ -29,13 +29,53 @@ module.exports = {
     //
     highlight: null,
 
-    maxNesting:   100            // Internal protection, recursion limit
+    maxNesting:   20            // Internal protection, recursion limit
   },
 
   components: {
 
-    core: {},
-    block: {},
-    inline: {}
+    core: {
+      rules: [
+        'normalize',
+        'block',
+        'inline'
+      ]
+    },
+
+    block: {
+      rules: [
+        'blockquote',
+        'code',
+        'fence',
+        'heading',
+        'hr',
+        'html_block',
+        'lheading',
+        'list',
+        'reference',
+        'paragraph'
+      ]
+    },
+
+    inline: {
+      rules: [
+        'autolink',
+        'backticks',
+        'emphasis',
+        'entity',
+        'escape',
+        'html_inline',
+        'image',
+        'link',
+        'newline',
+        'text'
+      ],
+      rules2: [
+        'balance_pairs',
+        'emphasis',
+        'text_collapse'
+      ]
+    }
   }
 };
+module.exports = preset;

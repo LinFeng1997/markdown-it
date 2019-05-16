@@ -1,10 +1,9 @@
-// "Zero" preset, with nothing enabled. Useful for manual configuring of simple
-// modes. For example, to parse bold/italic only.
+// markdown-it default options
 
 'use strict';
+import { Preset } from '../../types/index';
 
-
-module.exports = {
+const preset: Preset = {
   options: {
     html:         false,        // Enable HTML tags in source
     xhtmlOut:     false,        // Use '/' to close single tags (<br />)
@@ -30,33 +29,15 @@ module.exports = {
     //
     highlight: null,
 
-    maxNesting:   20            // Internal protection, recursion limit
+    maxNesting:   100            // Internal protection, recursion limit
   },
 
   components: {
 
-    core: {
-      rules: [
-        'normalize',
-        'block',
-        'inline'
-      ]
-    },
-
-    block: {
-      rules: [
-        'paragraph'
-      ]
-    },
-
-    inline: {
-      rules: [
-        'text'
-      ],
-      rules2: [
-        'balance_pairs',
-        'text_collapse'
-      ]
-    }
+    core: {},
+    block: {},
+    inline: {}
   }
 };
+
+module.exports = preset;

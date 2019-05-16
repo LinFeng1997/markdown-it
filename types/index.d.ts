@@ -86,7 +86,7 @@ declare module MarkdownIt {
         linkify?: boolean;
         typographer?: boolean;
         quotes: string;
-        highlight?: (str: string, lang: string) => void;
+        highlight?: ((str: string, lang: string) => void) | null;
         maxNesting: number;
     }
 
@@ -112,5 +112,21 @@ declare module MarkdownIt {
         marker: number;
         open: boolean;
         token: number;
+    }
+
+    interface Preset {
+        options: Options,
+        components: {
+            core: {
+                rules?: string[]
+            },
+            block: {
+                rules?: string[]
+            },
+            inline: {
+                rules?: string[],
+                rules2?: string[]
+            }
+        }
     }
 }
