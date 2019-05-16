@@ -3,22 +3,26 @@
 'use strict';
 
 
-function _class(obj) { return Object.prototype.toString.call(obj); }
+function _class(obj: Object): string {
+  return Object.prototype.toString.call(obj);
+}
 
-function isString(obj) { return _class(obj) === '[object String]'; }
+function isString(obj: Object): boolean {
+  return _class(obj) === '[object String]';
+}
 
 var _hasOwnProperty = Object.prototype.hasOwnProperty;
 
-function has(object, key) {
+function has(object: Object, key: string): boolean {
   return _hasOwnProperty.call(object, key);
 }
 
 // Merge objects
 //
-function assign(obj /*from1, from2, from3, ...*/) {
-  var sources = Array.prototype.slice.call(arguments, 1);
+function assign<O>(obj: O /*from1, from2, from3, ...*/): O {
+  var sources: string[] = Array.prototype.slice.call(arguments, 1);
 
-  sources.forEach(function (source) {
+  sources.forEach(function (source:string) {
     if (!source) { return; }
 
     if (typeof source !== 'object') {
@@ -35,13 +39,14 @@ function assign(obj /*from1, from2, from3, ...*/) {
 
 // Remove element from array and put another array at those position.
 // Useful for some operations with tokens
-function arrayReplaceAt(src, pos, newElements) {
-  return [].concat(src.slice(0, pos), newElements, src.slice(pos + 1));
+function arrayReplaceAt(src: string, pos: number, newElements: string): string[] {
+  let rst: string[] = [];
+  return rst.concat(src.slice(0, pos), newElements, src.slice(pos + 1));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function isValidEntityCode(c) {
+function isValidEntityCode(c: number): boolean {
   /*eslint no-bitwise:0*/
   // broken sequence
   if (c >= 0xD800 && c <= 0xDFFF) { return false; }
@@ -58,7 +63,7 @@ function isValidEntityCode(c) {
   return true;
 }
 
-function fromCodePoint(c) {
+function fromCodePoint(c: number): string {
   /*eslint no-bitwise:0*/
   if (c > 0xffff) {
     c -= 0x10000;
@@ -79,7 +84,7 @@ var DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
 
 var entities = require('./entities');
 
-function replaceEntityPattern(match, name) {
+function replaceEntityPattern(match: string, name: string): string {
   var code = 0;
 
   if (has(entities, name)) {
@@ -105,12 +110,12 @@ function replaceEntityPattern(match, name) {
   return str.replace(ENTITY_RE, replaceEntityPattern);
 }*/
 
-function unescapeMd(str) {
+function unescapeMd(str: string): string {
   if (str.indexOf('\\') < 0) { return str; }
   return str.replace(UNESCAPE_MD_RE, '$1');
 }
 
-function unescapeAll(str) {
+function unescapeAll(str: string): string {
   if (str.indexOf('\\') < 0 && str.indexOf('&') < 0) { return str; }
 
   return str.replace(UNESCAPE_ALL_RE, function (match, escaped, entity) {
@@ -130,11 +135,11 @@ var HTML_REPLACEMENTS = {
   '"': '&quot;'
 };
 
-function replaceUnsafeChar(ch) {
+function replaceUnsafeChar(ch: string): string {
   return HTML_REPLACEMENTS[ch];
 }
 
-function escapeHtml(str) {
+function escapeHtml(str: string): string {
   if (HTML_ESCAPE_TEST_RE.test(str)) {
     return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
   }
@@ -145,13 +150,13 @@ function escapeHtml(str) {
 
 var REGEXP_ESCAPE_RE = /[.?*+^$[\]\\(){}|-]/g;
 
-function escapeRE(str) {
+function escapeRE(str: string): string {
   return str.replace(REGEXP_ESCAPE_RE, '\\$&');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function isSpace(code) {
+function isSpace(code: number): boolean {
   switch (code) {
     case 0x09:
     case 0x20:
@@ -161,7 +166,7 @@ function isSpace(code) {
 }
 
 // Zs (unicode class) || [\t\f\v\r\n]
-function isWhiteSpace(code) {
+function isWhiteSpace(code: number): boolean {
   if (code >= 0x2000 && code <= 0x200A) { return true; }
   switch (code) {
     case 0x09: // \t
@@ -186,7 +191,7 @@ function isWhiteSpace(code) {
 var UNICODE_PUNCT_RE = require('uc.micro/categories/P/regex');
 
 // Currently without astral characters support.
-function isPunctChar(ch) {
+function isPunctChar(ch: string): boolean {
   return UNICODE_PUNCT_RE.test(ch);
 }
 
@@ -198,7 +203,7 @@ function isPunctChar(ch) {
 //
 // Don't confuse with unicode punctuation !!! It lacks some chars in ascii range.
 //
-function isMdAsciiPunct(ch) {
+function isMdAsciiPunct(ch: number): boolean {
   switch (ch) {
     case 0x21/* ! */:
     case 0x22/* " */:
@@ -240,7 +245,7 @@ function isMdAsciiPunct(ch) {
 
 // Hepler to unify [reference labels].
 //
-function normalizeReference(str) {
+function normalizeReference(str: string): string {
   // use .toUpperCase() instead of .toLowerCase()
   // here to avoid a conflict with Object.prototype
   // members (most notably, `__proto__`)
