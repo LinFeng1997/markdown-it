@@ -3,23 +3,23 @@
 'use strict';
 
 
-function _class(obj: Object): string {
+export function _class(obj: Object): string {
   return Object.prototype.toString.call(obj);
 }
 
-function isString(obj: Object): boolean {
+export function isString(obj: Object): boolean {
   return _class(obj) === '[object String]';
 }
 
 var _hasOwnProperty = Object.prototype.hasOwnProperty;
 
-function has(object: Object, key: string): boolean {
+export function has(object: Object, key: string): boolean {
   return _hasOwnProperty.call(object, key);
 }
 
 // Merge objects
 //
-function assign<O>(obj: O /*from1, from2, from3, ...*/): O {
+export function assign<O>(obj: O,...args /*from1, from2, from3, ...*/): O {
   var sources: string[] = Array.prototype.slice.call(arguments, 1);
 
   sources.forEach(function (source:string) {
@@ -39,14 +39,14 @@ function assign<O>(obj: O /*from1, from2, from3, ...*/): O {
 
 // Remove element from array and put another array at those position.
 // Useful for some operations with tokens
-function arrayReplaceAt(src: string, pos: number, newElements: string): string[] {
+export function arrayReplaceAt(src: string, pos: number, newElements: string): string[] {
   let rst: string[] = [];
   return rst.concat(src.slice(0, pos), newElements, src.slice(pos + 1));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function isValidEntityCode(c: number): boolean {
+export function isValidEntityCode(c: number): boolean {
   /*eslint no-bitwise:0*/
   // broken sequence
   if (c >= 0xD800 && c <= 0xDFFF) { return false; }
@@ -63,7 +63,7 @@ function isValidEntityCode(c: number): boolean {
   return true;
 }
 
-function fromCodePoint(c: number): string {
+export function fromCodePoint(c: number): string {
   /*eslint no-bitwise:0*/
   if (c > 0xffff) {
     c -= 0x10000;
@@ -84,7 +84,7 @@ var DIGITAL_ENTITY_TEST_RE = /^#((?:x[a-f0-9]{1,8}|[0-9]{1,8}))/i;
 
 var entities = require('./entities');
 
-function replaceEntityPattern(match: string, name: string): string {
+export function replaceEntityPattern(match: string, name: string): string {
   var code = 0;
 
   if (has(entities, name)) {
@@ -110,12 +110,12 @@ function replaceEntityPattern(match: string, name: string): string {
   return str.replace(ENTITY_RE, replaceEntityPattern);
 }*/
 
-function unescapeMd(str: string): string {
+export function unescapeMd(str: string): string {
   if (str.indexOf('\\') < 0) { return str; }
   return str.replace(UNESCAPE_MD_RE, '$1');
 }
 
-function unescapeAll(str: string): string {
+export function unescapeAll(str: string): string {
   if (str.indexOf('\\') < 0 && str.indexOf('&') < 0) { return str; }
 
   return str.replace(UNESCAPE_ALL_RE, function (match, escaped, entity) {
@@ -135,11 +135,11 @@ var HTML_REPLACEMENTS = {
   '"': '&quot;'
 };
 
-function replaceUnsafeChar(ch: string): string {
+export function replaceUnsafeChar(ch: string): string {
   return HTML_REPLACEMENTS[ch];
 }
 
-function escapeHtml(str: string): string {
+export function escapeHtml(str: string): string {
   if (HTML_ESCAPE_TEST_RE.test(str)) {
     return str.replace(HTML_ESCAPE_REPLACE_RE, replaceUnsafeChar);
   }
@@ -150,13 +150,13 @@ function escapeHtml(str: string): string {
 
 var REGEXP_ESCAPE_RE = /[.?*+^$[\]\\(){}|-]/g;
 
-function escapeRE(str: string): string {
+export function escapeRE(str: string): string {
   return str.replace(REGEXP_ESCAPE_RE, '\\$&');
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function isSpace(code: number): boolean {
+export function isSpace(code: number): boolean {
   switch (code) {
     case 0x09:
     case 0x20:
@@ -166,7 +166,7 @@ function isSpace(code: number): boolean {
 }
 
 // Zs (unicode class) || [\t\f\v\r\n]
-function isWhiteSpace(code: number): boolean {
+export function isWhiteSpace(code: number): boolean {
   if (code >= 0x2000 && code <= 0x200A) { return true; }
   switch (code) {
     case 0x09: // \t
@@ -191,7 +191,7 @@ function isWhiteSpace(code: number): boolean {
 var UNICODE_PUNCT_RE = require('uc.micro/categories/P/regex');
 
 // Currently without astral characters support.
-function isPunctChar(ch: string): boolean {
+export function isPunctChar(ch: string): boolean {
   return UNICODE_PUNCT_RE.test(ch);
 }
 
@@ -203,7 +203,7 @@ function isPunctChar(ch: string): boolean {
 //
 // Don't confuse with unicode punctuation !!! It lacks some chars in ascii range.
 //
-function isMdAsciiPunct(ch: number): boolean {
+export function isMdAsciiPunct(ch: number): boolean {
   switch (ch) {
     case 0x21/* ! */:
     case 0x22/* " */:
@@ -245,7 +245,7 @@ function isMdAsciiPunct(ch: number): boolean {
 
 // Hepler to unify [reference labels].
 //
-function normalizeReference(str: string): string {
+export function normalizeReference(str: string): string {
   // use .toUpperCase() instead of .toLowerCase()
   // here to avoid a conflict with Object.prototype
   // members (most notably, `__proto__`)
@@ -258,23 +258,23 @@ function normalizeReference(str: string): string {
 // so plugins won't have to depend on them explicitly, which reduces their
 // bundled size (e.g. a browser build).
 //
-exports.lib                 = {};
-exports.lib.mdurl           = require('mdurl');
-exports.lib.ucmicro         = require('uc.micro');
-
-exports.assign              = assign;
-exports.isString            = isString;
-exports.has                 = has;
-exports.unescapeMd          = unescapeMd;
-exports.unescapeAll         = unescapeAll;
-exports.isValidEntityCode   = isValidEntityCode;
-exports.fromCodePoint       = fromCodePoint;
-// exports.replaceEntities     = replaceEntities;
-exports.escapeHtml          = escapeHtml;
-exports.arrayReplaceAt      = arrayReplaceAt;
-exports.isSpace             = isSpace;
-exports.isWhiteSpace        = isWhiteSpace;
-exports.isMdAsciiPunct      = isMdAsciiPunct;
-exports.isPunctChar         = isPunctChar;
-exports.escapeRE            = escapeRE;
-exports.normalizeReference  = normalizeReference;
+// exports.lib                 = {};
+// exports.lib.mdurl           = require('mdurl');
+// exports.lib.ucmicro         = require('uc.micro');
+//
+// exports.assign              = assign;
+// exports.isString            = isString;
+// exports.has                 = has;
+// exports.unescapeMd          = unescapeMd;
+// exports.unescapeAll         = unescapeAll;
+// exports.isValidEntityCode   = isValidEntityCode;
+// exports.fromCodePoint       = fromCodePoint;
+// // exports.replaceEntities     = replaceEntities;
+// exports.escapeHtml          = escapeHtml;
+// exports.arrayReplaceAt      = arrayReplaceAt;
+// exports.isSpace             = isSpace;
+// exports.isWhiteSpace        = isWhiteSpace;
+// exports.isMdAsciiPunct      = isMdAsciiPunct;
+// exports.isPunctChar         = isPunctChar;
+// exports.escapeRE            = escapeRE;
+// exports.normalizeReference  = normalizeReference;

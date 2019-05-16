@@ -5,7 +5,7 @@ import MarkdownItConstructor = require("../types/index");
 import { Options } from '../types/index';
 import Token = require("./token");
 
-var utils        = require('./common/utils');
+import * as utils from './common/utils';
 var helpers      = require('./helpers');
 var Renderer     = require('./renderer');
 var ParserCore   = require('./parser_core');

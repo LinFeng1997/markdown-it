@@ -7,16 +7,22 @@ var isSpace     = require('../common/utils').isSpace;
 var unescapeAll = require('../common/utils').unescapeAll;
 
 
-module.exports = function parseLinkDestination(str, pos, max) {
-  var code, level,
-      lines = 0,
-      start = pos,
-      result = {
-        ok: false,
-        pos: 0,
-        lines: 0,
-        str: ''
-      };
+module.exports = function parseLinkDestination(str: string, pos: number, max: number): {
+  ok: boolean,
+  pos: number,
+  lines: number,
+  str: string
+} {
+  let code: number,
+    level: number,
+    lines = 0,
+    start = pos,
+    result = {
+      ok: false,
+      pos: 0,
+      lines: 0,
+      str: ''
+    };
 
   if (str.charCodeAt(pos) === 0x3C /* < */) {
     pos++;
