@@ -6,9 +6,9 @@
 var unescapeAll = require('../common/utils').unescapeAll;
 
 
-module.exports = function parseLinkTitle(str, pos, max) {
-  var code,
-      marker,
+module.exports = function parseLinkTitle(str: string, pos: number, max: number): { ok: boolean, pos: number, lines: number, str: string } {
+  let code: number,
+      marker: number,
       lines = 0,
       start = pos,
       result = {
