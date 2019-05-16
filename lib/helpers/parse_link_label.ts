@@ -5,11 +5,16 @@
 //
 'use strict';
 
-module.exports = function parseLinkLabel(state, start, disableNested) {
-  var level, found, marker, prevPos,
-      labelEnd = -1,
-      max = state.posMax,
-      oldPos = state.pos;
+import StateInline = require("../../types/rules_inline/state_inline");
+
+module.exports = function parseLinkLabel(state: StateInline, start: number, disableNested: boolean) {
+    let level: number,
+        found: boolean = false,
+        marker: number,
+        prevPos: number,
+        labelEnd = -1,
+        max = state.posMax,
+        oldPos = state.pos;
 
   state.pos = start + 1;
   level = 1;
