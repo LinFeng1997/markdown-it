@@ -40,8 +40,7 @@ gh-demo: demo
 lint:
 	eslint .
 
-test:
-	# lint
+test: lint
 	mocha --require ts-node/register
 	echo "CommonMark stat:\n"
 	./node_modules/.bin/ts-node ./support/specsplit.js test/fixtures/commonmark/spec.txt

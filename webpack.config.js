@@ -3,7 +3,7 @@ var path = require('path');
 module.exports = {
   entry: './index.ts',
   output: {
-    path: path.resolve(__dirname, 'dist2'),
+    path: path.resolve(__dirname, 'dist'),
     filename: 'markdown-it.min.js',
     library: 'markdown-it',
     libraryTarget: 'umd',
