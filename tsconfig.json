@@ -5,9 +5,12 @@
     "declaration": true,
     "strict": true,
     "noImplicitAny": false,
-    "typeRoots": ["types", "./node_modules/@types"],
-    "paths": {
-      "@type/*": ["types/*"]
-    }
-  }
+    "rootDir": "lib",
+    "moduleResolution": "Node",
+    "typeRoots": ["types", "./node_modules/@types"]
+  },
+  "include": [
+    "lib/**/*",
+    "types/**/*"
+  ]
 }
