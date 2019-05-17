@@ -4,13 +4,21 @@
     "module": "commonjs",
     "declaration": true,
     "strict": true,
+    "outDir": "dist",
     "noImplicitAny": false,
-    "rootDir": "lib",
+    "rootDirs": [
+      "lib",
+      "index.ts"
+    ],
     "moduleResolution": "Node",
-    "typeRoots": ["types", "./node_modules/@types"]
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ]
   },
   "include": [
     "lib/**/*",
-    "types/**/*"
+    "types/**/*",
+    "index.ts"
   ]
 }
