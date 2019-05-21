@@ -18,7 +18,8 @@
   "scripts": {
     "test": "make test",
     "heroku-postbuild": "npm install express",
-    "build": "webpack"
+    "build": "webpack",
+    "debug": "mocha --require ts-node/register --inspect-brk"
   },
   "files": [
     "index.js",
