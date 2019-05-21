@@ -33,11 +33,11 @@ var config = {
 var BAD_PROTO_RE = /^(vbscript|javascript|file|data):/;
 var GOOD_DATA_RE = /^data:image\/(gif|png|jpeg|webp);/;
 
-function validateLink(url) {
+function validateLink(url: string): boolean {
   // url should be normalized at this point, and existing entities are decoded
   var str = url.trim().toLowerCase();
 
-  return BAD_PROTO_RE.test(str) ? (GOOD_DATA_RE.test(str) ? true : false) : true;
+  return BAD_PROTO_RE.test(str) ? GOOD_DATA_RE.test(str) : true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,8 +45,11 @@ function validateLink(url) {
 
 var RECODE_HOSTNAME_FOR = [ 'http:', 'https:', 'mailto:' ];
 
-function normalizeLink(url) {
-  var parsed = mdurl.parse(url, true);
+function normalizeLink(url: string): string {
+  var parsed: {
+    hostname: string,
+    protocol: string
+  } = mdurl.parse(url, true);
 
   if (parsed.hostname) {
     // Encode hostnames in urls like:
@@ -65,8 +68,11 @@ function normalizeLink(url) {
   return mdurl.encode(mdurl.format(parsed));
 }
 
-function normalizeLinkText(url) {
-  var parsed = mdurl.parse(url, true);
+function normalizeLinkText(url: string): string {
+  var parsed: {
+    hostname: string,
+    protocol: string
+  }  = mdurl.parse(url, true);
 
   if (parsed.hostname) {
     // Encode hostnames in urls like:
@@ -227,7 +233,7 @@ class MarkdownIt implements MarkdownItConstructor{
   // linkify: LinkifyIt;
   // renderer: Renderer;
   // options: MarkdownIt.Options;
-  block: any;
+  block;
   core: any;
   helpers: any;
   inline: any;
@@ -531,8 +537,8 @@ class MarkdownIt implements MarkdownItConstructor{
  *             });
    * ```
    **/
-  use(plugin /*, params, ... */) {
-    var args = [ this ].concat(Array.prototype.slice.call(arguments, 1));
+  use(plugin,...rest /*, params, ... */) {
+    var args = [ this ].concat(rest);
     plugin.apply(plugin, args);
     return this;
   };
