@@ -35,14 +35,6 @@ class StateBlock extends State{
 
   constructor(src: string, md: MarkdownIt, env: any, tokens) {
     super(src, md, env);
-    let ch,
-      s,
-      start,
-      pos,
-      len,
-      indent,
-      offset,
-      indent_found;
 
     this.src = src;
 
@@ -93,11 +85,28 @@ class StateBlock extends State{
 
     // Create caches
     // Generate markers.
-    s = this.src;
-    indent_found = false;
+    this.scan();
 
-    for (start = pos = indent = offset = 0, len = s.length; pos < len; pos++) {
-      ch = s.charCodeAt(pos);
+    // Push fake entry to simplify cache bounds checks
+    this.bMarks.push(this.src.length);
+    this.eMarks.push(this.src.length);
+    this.tShift.push(0);
+    this.sCount.push(0);
+    this.bsCount.push(0);
+
+    this.lineMax = this.bMarks.length - 1; // don't count last fake line
+  }
+
+  private scan() {
+    let indent_found = false,
+        ch: number,
+        start: number,
+        pos: number,
+        len: number,
+        indent: number,
+        offset: number;
+    for (start = pos = indent = offset = 0, len = this.src.length; pos < len; pos++) {
+      ch = this.src.charCodeAt(pos);
 
       if (!indent_found) {
         if (isSpace(ch)) {
@@ -130,15 +139,6 @@ class StateBlock extends State{
         start = pos + 1;
       }
     }
-
-    // Push fake entry to simplify cache bounds checks
-    this.bMarks.push(s.length);
-    this.eMarks.push(s.length);
-    this.tShift.push(0);
-    this.sCount.push(0);
-    this.bsCount.push(0);
-
-    this.lineMax = this.bMarks.length - 1; // don't count last fake line
   }
 
   // Push new token to "stream".
