@@ -3,6 +3,7 @@
 'use strict';
 
 import MarkdownIt = require("../../types");
+import TokenType from "../../types/token";
 import State = require('../rules_core/state_core');
 
 var Token = require('../token');
@@ -142,13 +143,17 @@ class StateBlock extends State{
   }
 
   // Push new token to "stream".
-  push(type: string, tag: string, nesting: number):typeof Token {
-    var token = new Token(type, tag, nesting);
+  push(type: string, tag: string, nesting: number): TokenType {
+    var token: TokenType = new Token(type, tag, nesting);
     token.block = true;
 
-    if (nesting < 0) { this.level--; }
+    if (nesting < 0) {
+      this.level--;
+    }
     token.level = this.level;
-    if (nesting > 0) { this.level++; }
+    if (nesting > 0) {
+      this.level++;
+    }
 
     this.tokens.push(token);
     return token;
@@ -159,9 +164,9 @@ class StateBlock extends State{
   };
 
 
-  skipEmptyLines(from:number):number {
+  skipEmptyLines(from: number): number {
     for (let max = this.lineMax; from < max; from++) {
-      if (this.bMarks[from] + this.tShift[from] < this.eMarks[from]) {
+      if (!this.isEmpty(from)) {
         break;
       }
     }
@@ -196,20 +201,26 @@ class StateBlock extends State{
   };
 
   // Skip char codes from given position
-  skipChars(pos:number, code:number):number {
-    for (let max:number = this.src.length; pos < max; pos++) {
-      if (this.src.charCodeAt(pos) !== code) { break; }
+  skipChars(pos: number, code: number): number {
+    for (let max: number = this.src.length; pos < max; pos++) {
+      if (this.src.charCodeAt(pos) !== code) {
+        break;
+      }
     }
     return pos;
   };
 
 
 // Skip char codes reverse from given position - 1
-  skipCharsBack(pos:number, code:number, min:number):number {
-    if (pos <= min) { return pos; }
+  skipCharsBack(pos: number, code: number, min: number): number {
+    if (pos <= min) {
+      return pos;
+    }
 
     while (pos > min) {
-      if (code !== this.src.charCodeAt(--pos)) { return pos + 1; }
+      if (code !== this.src.charCodeAt(--pos)) {
+        return pos + 1;
+      }
     }
     return pos;
   };
