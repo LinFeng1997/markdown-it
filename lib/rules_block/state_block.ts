@@ -175,11 +175,8 @@ class StateBlock extends State{
 
   // Skip spaces from given position.
   skipSpaces(pos: number): number {
-    let ch: number;
-
     for (let max: number = this.src.length; pos < max; pos++) {
-      ch = this.src.charCodeAt(pos);
-      if (!isSpace(ch)) {
+      if (!isSpace(this.src.charCodeAt(pos))) {
         break;
       }
     }
