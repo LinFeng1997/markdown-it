@@ -58,6 +58,8 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
     "markdown-it-testgen": "~0.1.3",
+    "@typescript-eslint/eslint-plugin": "^1.4.2",
+    "@typescript-eslint/parser": "^1.4.2",
     "mocha": "^5.2.0",
     "ndoc": "^5.0.0",
     "stylus": "~0.54.2",

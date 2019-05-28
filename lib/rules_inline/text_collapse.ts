@@ -1,6 +1,6 @@
 // Merge adjacent text nodes into one, and re-calculate all token levels
 //
-'use strict';
+
 import StateInline from "./state_inline";
 
 module.exports = function text_collapse(state: StateInline): void {

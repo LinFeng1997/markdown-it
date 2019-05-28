@@ -1,6 +1,6 @@
 // Core state object
 //
-'use strict';
+
 import Token = require('../token');
 import MarkdownIt = require("../../types");
 

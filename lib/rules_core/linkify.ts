@@ -2,7 +2,7 @@
 //
 // Currently restricted by `md.validateLink()` to http/https/ftp
 //
-'use strict';
+
 
 import State from '../../types/rules_core/state_core';
 import Token = require('../token');

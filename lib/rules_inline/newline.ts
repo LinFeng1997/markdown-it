@@ -1,6 +1,6 @@
 // Proceess '\n'
 
-'use strict';
+
 import StateInline from "./state_inline";
 
 var isSpace = require('../common/utils').isSpace;

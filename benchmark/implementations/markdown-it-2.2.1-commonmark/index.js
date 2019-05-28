@@ -1,4 +1,4 @@
-'use strict';
+
 
 var md = require('../../extra/lib/node_modules/markdown-it')('commonmark');
 

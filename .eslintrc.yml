@@ -1,7 +1,13 @@
 env:
   node:     true
   browser:  false
-  es6:      false
+  es6:      true
+
+#parser: '@typescript-eslint/parser'
+
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: 'module'
 
 rules:
   accessor-pairs:         2
@@ -107,7 +113,7 @@ rules:
   no-return-assign:       2
   no-self-compare:        2
   no-sequences:           2
-  no-shadow:              2
+#  no-shadow:              2
   no-shadow-restricted-names: 2
   no-sparse-arrays:       2
   no-trailing-spaces:     2

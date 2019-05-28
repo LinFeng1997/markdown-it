@@ -1,6 +1,6 @@
 // Parse link destination
 //
-'use strict';
+
 
 
 var isSpace     = require('../common/utils').isSpace;

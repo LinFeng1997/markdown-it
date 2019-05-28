@@ -1,6 +1,6 @@
 // For each opening emphasis-like marker find a matching closing one
 //
-'use strict';
+
 import StateInline from "./state_inline";
 import MarkdownIt = require("../../types/index");
 

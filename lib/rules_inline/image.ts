@@ -1,6 +1,6 @@
 // Process ![image](<src> "title")
 
-'use strict';
+
 import StateInline from "./state_inline";
 import Token = require("../token");
 

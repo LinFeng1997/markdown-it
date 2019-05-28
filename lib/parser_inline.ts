@@ -3,7 +3,7 @@
  *
  * Tokenizes paragraph content.
  **/
-'use strict';
+
 
 import Token from "../types/token";
 

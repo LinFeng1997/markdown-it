@@ -1,6 +1,6 @@
 // Commonmark default options
 
-'use strict';
+
 import {Preset} from '../../types/index';
 
 const preset: Preset = {

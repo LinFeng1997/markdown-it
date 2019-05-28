@@ -1,6 +1,6 @@
 // Horizontal rule
 
-'use strict';
+
 import StateBlock from "./state_block";
 import { RuleBlock } from "../../types";
 import Token = require('../token');;

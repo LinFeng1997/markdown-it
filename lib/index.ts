@@ -1,6 +1,6 @@
 // Main parser class
 
-'use strict';
+
 import MarkdownItConstructor = require("../types/index");
 import { Options } from '../types/index';
 import Token = require("./token");

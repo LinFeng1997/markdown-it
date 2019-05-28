@@ -1,6 +1,6 @@
 // HTML block
 
-'use strict';
+
 
 
 import StateBlock from "./state_block";

@@ -1,6 +1,6 @@
 // Process *this* and _that_
 //
-'use strict';
+
 import StateInline from "./state_inline";
 import Token = require("../token");
 import MarkdownIt = require("../../types/index");

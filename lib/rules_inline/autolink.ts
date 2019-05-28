@@ -1,6 +1,6 @@
 // Process autolinks '<protocol:...>'
 
-'use strict';
+
 import StateInline from "./state_inline";
 import Token = require("../token");
 

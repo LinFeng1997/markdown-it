@@ -1,6 +1,6 @@
 // Normalize input string
 
-'use strict';
+
 
 import State from '../../types/rules_core/state_core';
 

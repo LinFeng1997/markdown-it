@@ -9,7 +9,7 @@
 // ???????? → ???, !!!!! → !!!, `,,` → `,`
 // -- → &ndash;, --- → &mdash;
 //
-'use strict';
+
 
 import State from '../../types/rules_core/state_core';
 import Token = require('../token');

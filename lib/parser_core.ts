@@ -4,7 +4,7 @@
  * Top-level rules executor. Glues block/inline parsers and does intermediate
  * transformations.
  **/
-'use strict';
+
 
 import RulerType from './ruler';
 import State from '../types/rules_core/state_core';

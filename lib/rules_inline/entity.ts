@@ -1,6 +1,6 @@
 // Process html entity - &#123;, &#xAF;, &quot;, ...
 
-'use strict';
+
 
 import StateInline from "./state_inline";
 

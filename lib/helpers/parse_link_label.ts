@@ -3,7 +3,7 @@
 // this function assumes that first character ("[") already matches;
 // returns the end of the label
 //
-'use strict';
+
 
 import StateInline = require("../../types/rules_inline/state_inline");
 

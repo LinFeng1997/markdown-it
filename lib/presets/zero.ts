@@ -1,7 +1,7 @@
 // "Zero" preset, with nothing enabled. Useful for manual configuring of simple
 // modes. For example, to parse bold/italic only.
 
-'use strict';
+
 import { Preset } from '../../types/index';
 
 const preset: Preset = {

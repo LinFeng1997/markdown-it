@@ -1,4 +1,4 @@
-'use strict';
+
 
 var md = require('../../../')('commonmark');
 

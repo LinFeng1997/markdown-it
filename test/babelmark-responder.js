@@ -1,5 +1,3 @@
-'use strict';
-
 
 describe('babelmark responder app', function () {
   var app;
@@ -16,11 +14,11 @@ describe('babelmark responder app', function () {
         cwd: __dirname,
         env: Object.assign({}, process.env, { PORT: PORT })
       },
-      (error, stdout) => {
+      (error) => {
         if (error) {
           throw error;
         }
-        console.log(stdout);
+        // console.log(stdout);
       }
     );
 

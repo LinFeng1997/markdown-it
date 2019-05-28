@@ -1,6 +1,6 @@
 // Paragraph
 
-'use strict';
+
 
 import StateBlock from "./state_block";
 import Token = require('../token');;

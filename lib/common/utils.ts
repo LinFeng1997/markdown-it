@@ -1,6 +1,6 @@
 // Utilities
 //
-'use strict';
+
 
 
 export function _class(obj: Object): string {

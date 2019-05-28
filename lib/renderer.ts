@@ -7,7 +7,7 @@
  **/
 
 
-'use strict';
+
 
 import Token from "../types/token";
 import MarkdownIt = require("../types/index");

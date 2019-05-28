@@ -1,6 +1,6 @@
 // lheading (---, ===)
 
-'use strict';
+
 
 
 import StateBlock from "./state_block";

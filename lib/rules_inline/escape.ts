@@ -1,6 +1,6 @@
 // Process escaped chars and hardbreaks
 
-'use strict';
+
 import StateInline from "./state_inline";
 
 const isSpace = require('../common/utils').isSpace;

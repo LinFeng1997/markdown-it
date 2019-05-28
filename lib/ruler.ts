@@ -15,7 +15,7 @@
  * rules control use [[MarkdownIt.disable]], [[MarkdownIt.enable]] and
  * [[MarkdownIt.use]].
  **/
-'use strict';
+
 
 
 import State from "../types/rules_core/state_core";

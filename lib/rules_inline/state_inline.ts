@@ -1,6 +1,6 @@
 // Inline parser state
 
-'use strict';
+
 import State = require('../rules_core/state_core');
 import MarkdownIt = require("../../types");
 import Token = require("../token");

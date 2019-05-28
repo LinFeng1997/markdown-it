@@ -1,9 +1,9 @@
 // Parser state class
 
-'use strict';
 
-import MarkdownIt = require("../../types");
-import TokenType from "../../types/token";
+
+import MarkdownIt = require('../../types');
+import TokenType from '../../types/token';
 import State = require('../rules_core/state_core');
 
 var Token = require('../token');
@@ -69,7 +69,7 @@ class StateBlock extends State{
 
     // block parser variables
     this.blkIndent = 0; // required block content indent
-                        // (for example, if we are in list)
+    // (for example, if we are in list)
     this.line = 0; // line index in src
     this.lineMax = 0; // lines count
     this.tight = false;  // loose/tight mode for lists
@@ -157,11 +157,11 @@ class StateBlock extends State{
 
     this.tokens.push(token);
     return token;
-  };
+  }
 
   isEmpty(line: number): boolean {
     return this.bMarks[line] + this.tShift[line] >= this.eMarks[line];
-  };
+  }
 
 
   skipEmptyLines(from: number): number {
@@ -171,7 +171,7 @@ class StateBlock extends State{
       }
     }
     return from;
-  };
+  }
 
 
   private skipConditionChars = (pos: number, condition: (pos: number) => boolean): number => {
@@ -182,7 +182,7 @@ class StateBlock extends State{
     }
     return pos;
   }
-  private skipConditionCharsBack = (pos: number, min: number,condition: (pos: number) => boolean): number => {
+  private skipConditionCharsBack = (pos: number, min: number, condition: (pos: number) => boolean): number => {
     if (pos <= min) {
       return pos;
     }
@@ -199,30 +199,30 @@ class StateBlock extends State{
   skipSpaces(pos: number): number {
     const condition = (pos: number) => !isSpace(this.src.charCodeAt(pos));
     return this.skipConditionChars(pos, condition);
-  };
+  }
 
   // Skip spaces from given position in reverse.
   skipSpacesBack(pos: number, min: number): number {
     const condition = (pos: number) => !isSpace(this.src.charCodeAt(pos));
-    return this.skipConditionCharsBack(pos,min,condition);
-  };
+    return this.skipConditionCharsBack(pos, min, condition);
+  }
 
   // Skip char codes from given position
   skipChars(pos: number, code: number): number {
     const condition = (pos: number) => code !== this.src.charCodeAt(pos);
-    return this.skipConditionChars(pos,condition);
-  };
+    return this.skipConditionChars(pos, condition);
+  }
 
   // Skip char codes reverse from given position - 1
   skipCharsBack(pos: number, code: number, min: number): number {
     const condition = (pos: number) => code !== this.src.charCodeAt(pos);
     return this.skipConditionCharsBack(pos, min, condition);
-  };
+  }
 
   // cut lines range from source.
-  getLines(begin:number, end:number, indent:number, keepLastLF:boolean) {
+  getLines(begin: number, end: number, indent: number, keepLastLF: boolean) {
     let i, lineIndent, ch, first, last, queue, lineStart,
-      line = begin;
+        line = begin;
 
     if (begin >= end) {
       return '';
@@ -270,7 +270,7 @@ class StateBlock extends State{
     }
 
     return queue.join('');
-  };
+  }
 
   // re-export Token class to use in block rules
   Token = Token
