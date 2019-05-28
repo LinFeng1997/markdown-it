@@ -173,56 +173,53 @@ class StateBlock extends State{
     return from;
   };
 
-  // Skip spaces from given position.
-  skipSpaces(pos: number): number {
+
+  private skipConditionChars = (pos: number, condition: (pos: number) => boolean): number => {
     for (let max: number = this.src.length; pos < max; pos++) {
-      if (!isSpace(this.src.charCodeAt(pos))) {
+      if (condition(pos)) {
         break;
       }
     }
     return pos;
+  }
+  private skipConditionCharsBack = (pos: number, min: number,condition: (pos: number) => boolean): number => {
+    if (pos <= min) {
+      return pos;
+    }
+
+    while (pos > min) {
+      --pos;
+      if (condition(pos)) {
+        return pos + 1;
+      }
+    }
+    return pos;
+  }
+  // Skip spaces from given position.
+  skipSpaces(pos: number): number {
+    const condition = (pos: number) => !isSpace(this.src.charCodeAt(pos));
+    return this.skipConditionChars(pos, condition);
   };
 
   // Skip spaces from given position in reverse.
   skipSpacesBack(pos: number, min: number): number {
-    if (pos <= min) {
-      return pos;
-    }
-
-    while (pos > min) {
-      if (!isSpace(this.src.charCodeAt(--pos))) {
-        return pos + 1;
-      }
-    }
-    return pos;
+    const condition = (pos: number) => !isSpace(this.src.charCodeAt(pos));
+    return this.skipConditionCharsBack(pos,min,condition);
   };
 
   // Skip char codes from given position
   skipChars(pos: number, code: number): number {
-    for (let max: number = this.src.length; pos < max; pos++) {
-      if (this.src.charCodeAt(pos) !== code) {
-        break;
-      }
-    }
-    return pos;
+    const condition = (pos: number) => code !== this.src.charCodeAt(pos);
+    return this.skipConditionChars(pos,condition);
   };
 
-
-// Skip char codes reverse from given position - 1
+  // Skip char codes reverse from given position - 1
   skipCharsBack(pos: number, code: number, min: number): number {
-    if (pos <= min) {
-      return pos;
-    }
-
-    while (pos > min) {
-      if (code !== this.src.charCodeAt(--pos)) {
-        return pos + 1;
-      }
-    }
-    return pos;
+    const condition = (pos: number) => code !== this.src.charCodeAt(pos);
+    return this.skipConditionCharsBack(pos, min, condition);
   };
 
-// cut lines range from source.
+  // cut lines range from source.
   getLines(begin:number, end:number, indent:number, keepLastLF:boolean) {
     let i, lineIndent, ch, first, last, queue, lineStart,
       line = begin;
