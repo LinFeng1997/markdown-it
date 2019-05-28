@@ -49,7 +49,6 @@ class StateBlock extends State{
     //
 
     this.tokens = tokens;
-
     this.bMarks = [];  // line begin offsets for fast jumps
     this.eMarks = [];  // line end offsets for fast jumps
     this.tShift = [];  // offsets of the first non-space characters (tabs not expanded)
@@ -221,7 +220,14 @@ class StateBlock extends State{
 
   // cut lines range from source.
   getLines(begin: number, end: number, indent: number, keepLastLF: boolean) {
-    let i, lineIndent, ch, first, last, queue, lineStart,
+    debugger
+    let i: number,
+        lineIndent: number,
+        ch: number,
+        first: number,
+        last: number,
+        queue: string[],
+        lineStart,
         line = begin;
 
     if (begin >= end) {
