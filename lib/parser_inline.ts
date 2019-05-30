@@ -9,7 +9,6 @@ import Token from "../types/token";
 
 import MarkdownIt = require('../types/index');
 import State = require("../types/rules_inline/state_inline");
-import {type} from "os";
 
 var Ruler           = require('./ruler');
 
