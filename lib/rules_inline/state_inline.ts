@@ -105,9 +105,7 @@ class StateInline extends State {
 
       isNextWhiteSpace: number,
       isNextPunctChar: string,
-      left_flanking = true,
 
-      right_flanking = true,
       max = this.posMax,
       marker = this.src.charCodeAt(start);
 
@@ -139,8 +137,8 @@ class StateInline extends State {
     isLastWhiteSpace = isWhiteSpace(lastChar);
     isNextWhiteSpace = isWhiteSpace(nextChar);
 
-    left_flanking = getFlanking(isNextWhiteSpace,isNextPunctChar,isLastWhiteSpace || isLastPunctChar);
-    right_flanking = getFlanking(isLastWhiteSpace,isLastPunctChar,isNextWhiteSpace || isNextPunctChar);
+    let left_flanking = getFlanking(isNextWhiteSpace,isNextPunctChar,isLastWhiteSpace || isLastPunctChar);
+    let right_flanking = getFlanking(isLastWhiteSpace,isLastPunctChar,isNextWhiteSpace || isNextPunctChar);
 
     if (!canSplitWord) {
       can_open  = left_flanking  && (!right_flanking || isLastPunctChar);
