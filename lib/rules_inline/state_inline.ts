@@ -114,6 +114,18 @@ class StateInline extends State {
     // treat beginning of the line as a whitespace
     lastChar = start > 0 ? this.src.charCodeAt(start - 1) : 0x20;
 
+    const isCommonPunctChar = char => isMdAsciiPunct(char) || isPunctChar(String.fromCharCode(char));
+    const getFlanking = (isWhiteSpace,isPunctChar,rightLast) => {
+      if (isWhiteSpace) {
+        return false
+      } else if (isPunctChar) {
+        if (!rightLast) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     while (pos < max && this.src.charCodeAt(pos) === marker) { pos++; }
 
     count = pos - start;
@@ -121,27 +133,14 @@ class StateInline extends State {
     // treat end of the line as a whitespace
     nextChar = pos < max ? this.src.charCodeAt(pos) : 0x20;
 
-    isLastPunctChar = isMdAsciiPunct(lastChar) || isPunctChar(String.fromCharCode(lastChar));
-    isNextPunctChar = isMdAsciiPunct(nextChar) || isPunctChar(String.fromCharCode(nextChar));
+    isLastPunctChar = isCommonPunctChar(lastChar)
+    isNextPunctChar = isCommonPunctChar(nextChar)
 
     isLastWhiteSpace = isWhiteSpace(lastChar);
     isNextWhiteSpace = isWhiteSpace(nextChar);
 
-    if (isNextWhiteSpace) {
-      left_flanking = false;
-    } else if (isNextPunctChar) {
-      if (!(isLastWhiteSpace || isLastPunctChar)) {
-        left_flanking = false;
-      }
-    }
-
-    if (isLastWhiteSpace) {
-      right_flanking = false;
-    } else if (isLastPunctChar) {
-      if (!(isNextWhiteSpace || isNextPunctChar)) {
-        right_flanking = false;
-      }
-    }
+    left_flanking = getFlanking(isNextWhiteSpace,isNextPunctChar,isLastWhiteSpace || isLastPunctChar);
+    right_flanking = getFlanking(isLastWhiteSpace,isLastPunctChar,isNextWhiteSpace || isNextPunctChar);
 
     if (!canSplitWord) {
       can_open  = left_flanking  && (!right_flanking || isLastPunctChar);

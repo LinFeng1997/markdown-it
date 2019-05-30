@@ -220,7 +220,6 @@ class StateBlock extends State{
 
   // cut lines range from source.
   getLines(begin: number, end: number, indent: number, keepLastLF: boolean) {
-    debugger
     let i: number,
         lineIndent: number,
         ch: number,
