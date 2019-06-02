@@ -39,8 +39,8 @@ export function assign<O>(obj: O,...args /*from1, from2, from3, ...*/): O {
 
 // Remove element from array and put another array at those position.
 // Useful for some operations with tokens
-export function arrayReplaceAt(src: string, pos: number, newElements: string): string[] {
-  let rst: string[] = [];
+export function arrayReplaceAt(src: any[], pos: number, newElements: any[]): string[] {
+  let rst: any[] = [];
   return rst.concat(src.slice(0, pos), newElements, src.slice(pos + 1));
 }
 
