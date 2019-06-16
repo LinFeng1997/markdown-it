@@ -14,6 +14,7 @@ const isWhiteSpace   = require('../common/utils').isWhiteSpace;
 // const isPunctChar    = require('../common/utils').isPunctChar;
 // const isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
 const isCommonPunctChar = require('../common/utils').isCommonPunctChar;
+const getFlanking = require('../common/utils').getFlanking;
 
 const QUOTE_TEST_RE = /['"]/;
 const QUOTE_RE = /['"]/g;
@@ -26,20 +27,8 @@ function replaceAt(str:string, index:number, ch:string):string {
 
 function process_inlines(tokens:Token[], state:State) {
   let token: Token,
-    item:Stack,
-    // lastChar: number,
-    nextChar: number,
-    isLastPunctChar: boolean,
-    isNextPunctChar: boolean,
-    isLastWhiteSpace: boolean,
-    isNextWhiteSpace: boolean,
-    // canOpen: boolean,
-    // canClose: boolean,
     j: number,
-    isSingle: boolean,
-    stack: Stack[] = [],
-    openQuote: string,
-    closeQuote: string;
+    stack: Stack[] = []
 
   function checkStack(level) {
     let j = stack.length - 1;
@@ -53,6 +42,10 @@ function process_inlines(tokens:Token[], state:State) {
 
   function isSingleQuote(char) {
       return char === "'"
+  }
+
+  function isDoubleQuote(char) {
+      return char === '"'
   }
 
   function getLastChar(text,index,i) {
@@ -105,10 +98,8 @@ function process_inlines(tokens:Token[], state:State) {
       let t = QUOTE_RE.exec(text);
       if (!t) { break; }
 
-      let canOpen  = true;
-      let canClose = true;
       pos = t.index + 1;
-      isSingle = isSingleQuote(t[0]);
+      let isSingle = isSingleQuote(t[0]);
 
       // Find previous character,
       // default to space if it's the beginning of the line
@@ -120,29 +111,17 @@ function process_inlines(tokens:Token[], state:State) {
       //
       let nextChar = getNextChar(text,pos,max,i);
 
-      isLastPunctChar = isCommonPunctChar(lastChar);
-      isNextPunctChar = isCommonPunctChar(nextChar);
+      let isLastPunctChar = isCommonPunctChar(lastChar);
+      let isNextPunctChar = isCommonPunctChar(nextChar);
 
-      isLastWhiteSpace = isWhiteSpace(lastChar);
-      isNextWhiteSpace = isWhiteSpace(nextChar);
+      let isLastWhiteSpace = isWhiteSpace(lastChar);
+      let isNextWhiteSpace = isWhiteSpace(nextChar);
 
-      if (isNextWhiteSpace) {
-        canOpen = false;
-      } else if (isNextPunctChar) {
-        if (!(isLastWhiteSpace || isLastPunctChar)) {
-          canOpen = false;
-        }
-      }
+      let canOpen = getFlanking(isNextWhiteSpace,isNextPunctChar,isLastWhiteSpace || isLastPunctChar);
 
-      if (isLastWhiteSpace) {
-        canClose = false;
-      } else if (isLastPunctChar) {
-        if (!(isNextWhiteSpace || isNextPunctChar)) {
-          canClose = false;
-        }
-      }
+      let canClose = getFlanking(isLastWhiteSpace,isLastPunctChar,isNextWhiteSpace || isNextPunctChar);
 
-      if (nextChar === 0x22 /* " */ && t[0] === '"') {
+      if (nextChar === 0x22 /* " */ && isDoubleQuote(t[0])) {
         if (lastChar >= 0x30 /* 0 */ && lastChar <= 0x39 /* 9 */) {
           // special case: 1"" - count first quote as an inch
           canClose = canOpen = false;
@@ -166,11 +145,13 @@ function process_inlines(tokens:Token[], state:State) {
       if (canClose) {
         // this could be a closing quote, rewind the stack to get a match
         for (j = stack.length - 1; j >= 0; j--) {
-          item = stack[j];
+          let item:Stack = stack[j];
           if (stack[j].level < tokens[i].level) { break; }
           if (item.single === isSingle && stack[j].level === tokens[i].level) {
             item = stack[j];
 
+            let openQuote: string;
+            let closeQuote: string;
             if (isSingle) {
               openQuote = state.md.options.quotes[2];
               closeQuote = state.md.options.quotes[3];
