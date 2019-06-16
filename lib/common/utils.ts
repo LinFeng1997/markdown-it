@@ -254,6 +254,17 @@ export function normalizeReference(str: string): string {
 
 export const isCommonPunctChar = char => isMdAsciiPunct(char) || isPunctChar(String.fromCharCode(char));
 
+export const getFlanking = (isWhiteSpace,isPunctChar,rightLast) => {
+    if (isWhiteSpace) {
+        return false
+    } else if (isPunctChar) {
+        if (!rightLast) {
+            return false;
+        }
+    }
+    return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Re-export libraries commonly used in both markdown-it and its plugins,

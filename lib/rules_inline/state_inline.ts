@@ -6,8 +6,8 @@ import MarkdownIt = require("../../types");
 import Token = require("../token");
 
 const isWhiteSpace   = require('../common/utils').isWhiteSpace;
-const isPunctChar    = require('../common/utils').isPunctChar;
-const isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
+const isCommonPunctChar    = require('../common/utils').isCommonPunctChar;
+const getFlanking    = require('../common/utils').getFlanking;
 
 
 class StateInline extends State {
@@ -111,18 +111,6 @@ class StateInline extends State {
 
     // treat beginning of the line as a whitespace
     lastChar = start > 0 ? this.src.charCodeAt(start - 1) : 0x20;
-
-    const isCommonPunctChar = char => isMdAsciiPunct(char) || isPunctChar(String.fromCharCode(char));
-    const getFlanking = (isWhiteSpace,isPunctChar,rightLast) => {
-      if (isWhiteSpace) {
-        return false
-      } else if (isPunctChar) {
-        if (!rightLast) {
-          return false;
-        }
-      }
-      return true;
-    }
 
     while (pos < max && this.src.charCodeAt(pos) === marker) { pos++; }
 
