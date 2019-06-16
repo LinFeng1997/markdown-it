@@ -252,6 +252,8 @@ export function normalizeReference(str: string): string {
   return str.trim().replace(/\s+/g, ' ').toUpperCase();
 }
 
+export const isCommonPunctChar = char => isMdAsciiPunct(char) || isPunctChar(String.fromCharCode(char));
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // Re-export libraries commonly used in both markdown-it and its plugins,

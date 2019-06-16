@@ -11,8 +11,9 @@ type Stack = {
 }
 
 const isWhiteSpace   = require('../common/utils').isWhiteSpace;
-const isPunctChar    = require('../common/utils').isPunctChar;
-const isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
+// const isPunctChar    = require('../common/utils').isPunctChar;
+// const isMdAsciiPunct = require('../common/utils').isMdAsciiPunct;
+const isCommonPunctChar = require('../common/utils').isCommonPunctChar;
 
 const QUOTE_TEST_RE = /['"]/;
 const QUOTE_RE = /['"]/g;
@@ -25,89 +26,102 @@ function replaceAt(str:string, index:number, ch:string):string {
 
 function process_inlines(tokens:Token[], state:State) {
   let token: Token,
-    text: string,
-    t: RegExpExecArray | null,
-    pos: number,
-    max: number,
-    thisLevel: number,
     item:Stack,
-    lastChar: number,
+    // lastChar: number,
     nextChar: number,
     isLastPunctChar: boolean,
     isNextPunctChar: boolean,
     isLastWhiteSpace: boolean,
     isNextWhiteSpace: boolean,
-    canOpen: boolean,
-    canClose: boolean,
+    // canOpen: boolean,
+    // canClose: boolean,
     j: number,
     isSingle: boolean,
     stack: Stack[] = [],
     openQuote: string,
     closeQuote: string;
 
+  function checkStack(level) {
+    let j = stack.length - 1;
+    for (; j >= 0; j--) {
+      if (stack[j].level <= level) {
+        break;
+      }
+    }
+    return j;
+  }
+
+  function isSingleQuote(char) {
+      return char === "'"
+  }
+
+  function getLastChar(text,index,i) {
+      let lastChar = 0x20;
+      if (index - 1 >= 0) {
+          lastChar = text.charCodeAt(index - 1);
+      } else {
+          for (j = i - 1; j >= 0; j--) {
+              if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // lastChar defaults to 0x20
+              if (tokens[j].type !== 'text') continue;
+
+              lastChar = tokens[j].content.charCodeAt(tokens[j].content.length - 1);
+              break;
+          }
+      }
+      return lastChar
+  }
+
+  function getNextChar(text,pos,max,i) {
+      let nextChar = 0x20;
+      if (pos < max) {
+          nextChar = text.charCodeAt(pos);
+      } else {
+          for (j = i + 1; j < tokens.length; j++) {
+              if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // nextChar defaults to 0x20
+              if (tokens[j].type !== 'text') continue;
+
+              nextChar = tokens[j].content.charCodeAt(0);
+              break;
+          }
+      }
+      return nextChar;
+  }
+
   for (let i = 0; i < tokens.length; i++) {
     token = tokens[i];
 
-    thisLevel = tokens[i].level;
-
-    for (j = stack.length - 1; j >= 0; j--) {
-      if (stack[j].level <= thisLevel) { break; }
-    }
-    stack.length = j + 1;
+    stack.length = checkStack(tokens[i].level) + 1;
 
     if (token.type !== 'text') { continue; }
 
-    text = token.content;
-    pos = 0;
-    max = text.length;
+    let text = token.content;
+    let pos = 0;
+    let max = text.length;
 
     /*eslint no-labels:0,block-scoped-var:0*/
     OUTER:
     while (pos < max) {
       QUOTE_RE.lastIndex = pos;
-      t = QUOTE_RE.exec(text);
+      let t = QUOTE_RE.exec(text);
       if (!t) { break; }
 
-      canOpen = canClose = true;
+      let canOpen  = true;
+      let canClose = true;
       pos = t.index + 1;
-      isSingle = (t[0] === "'");
+      isSingle = isSingleQuote(t[0]);
 
       // Find previous character,
       // default to space if it's the beginning of the line
       //
-      lastChar = 0x20;
-
-      if (t.index - 1 >= 0) {
-        lastChar = text.charCodeAt(t.index - 1);
-      } else {
-        for (j = i - 1; j >= 0; j--) {
-          if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // lastChar defaults to 0x20
-          if (tokens[j].type !== 'text') continue;
-
-          lastChar = tokens[j].content.charCodeAt(tokens[j].content.length - 1);
-          break;
-        }
-      }
+      let lastChar = getLastChar(text,t.index,i);
 
       // Find next character,
       // default to space if it's the end of the line
       //
-      nextChar = 0x20;
+      let nextChar = getNextChar(text,pos,max,i);
 
-      if (pos < max) {
-        nextChar = text.charCodeAt(pos);
-      } else {
-        for (j = i + 1; j < tokens.length; j++) {
-          if (tokens[j].type === 'softbreak' || tokens[j].type === 'hardbreak') break; // nextChar defaults to 0x20
-          if (tokens[j].type !== 'text') continue;
-
-          nextChar = tokens[j].content.charCodeAt(0);
-          break;
-        }
-      }
-
-      isLastPunctChar = isMdAsciiPunct(lastChar) || isPunctChar(String.fromCharCode(lastChar));
-      isNextPunctChar = isMdAsciiPunct(nextChar) || isPunctChar(String.fromCharCode(nextChar));
+      isLastPunctChar = isCommonPunctChar(lastChar);
+      isNextPunctChar = isCommonPunctChar(nextChar);
 
       isLastWhiteSpace = isWhiteSpace(lastChar);
       isNextWhiteSpace = isWhiteSpace(nextChar);
@@ -153,8 +167,8 @@ function process_inlines(tokens:Token[], state:State) {
         // this could be a closing quote, rewind the stack to get a match
         for (j = stack.length - 1; j >= 0; j--) {
           item = stack[j];
-          if (stack[j].level < thisLevel) { break; }
-          if (item.single === isSingle && stack[j].level === thisLevel) {
+          if (stack[j].level < tokens[i].level) { break; }
+          if (item.single === isSingle && stack[j].level === tokens[i].level) {
             item = stack[j];
 
             if (isSingle) {
@@ -189,7 +203,7 @@ function process_inlines(tokens:Token[], state:State) {
           token: i,
           pos: t.index,
           single: isSingle,
-          level: thisLevel
+          level: tokens[i].level
         });
       } else if (canClose && isSingle) {
         token.content = replaceAt(token.content, t.index, APOSTROPHE);
