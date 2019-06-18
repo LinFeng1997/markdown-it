@@ -3,7 +3,7 @@
 
 
 import StateBlock from "./state_block";
-import Token = require('../token');;
+import Token = require('../token');
 
 module.exports = function code(state:StateBlock, startLine: number, endLine: number/*, silent*/) {
   let nextLine: number, last: number, token: Token;
