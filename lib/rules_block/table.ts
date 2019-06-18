@@ -2,7 +2,7 @@
 
 
 import StateBlock from "./state_block";
-import Token = require('../token');;
+import Token = require('../token');
 
 const isSpace = require('../common/utils').isSpace;
 
