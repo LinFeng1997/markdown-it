@@ -244,7 +244,7 @@ class MarkdownIt implements MarkdownItConstructor{
   validateLink:any;
   normalizeLink:any;
   normalizeLinkText:any;
-  constructor(presetName, options) {
+  constructor(presetName?, options?) {
     if (!(this instanceof MarkdownIt)) {
       return new MarkdownIt(presetName, options);
     }
@@ -387,7 +387,7 @@ class MarkdownIt implements MarkdownItConstructor{
    * But you will not need it with high probability. See also comment
    * in [[MarkdownIt.parse]].
    **/
-  render(src: string, env: any): string {
+  render(src: string, env?: any): string {
     env = env || {};
 
     return this.renderer.render(this.parse(src, env), this.options, env);
