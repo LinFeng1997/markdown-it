@@ -44,7 +44,7 @@ module.exports = function hr(state: StateBlock, startLine: number, endLine: numb
 
   token        = state.push('hr', 'hr', 0);
   token.map    = [ startLine, state.line ];
-  token.markup = Array(cnt + 1).join(String.fromCharCode(marker));
+  token.markup = Array(cnt).join(String.fromCharCode(marker));
 
   return true;
 };
