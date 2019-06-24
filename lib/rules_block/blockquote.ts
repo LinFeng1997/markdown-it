@@ -1,39 +1,25 @@
 // Block quotes
 
-
 import StateBlock from "./state_block";
-import { RuleBlock } from "../../types";
-import Token = require('../token');;
 
 const isSpace = require('../common/utils').isSpace;
 
 module.exports = function blockquote(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean {
-  let adjustTab: boolean = false,
-    ch: number,
-    i: number,
-    initial: number,
-    l: number,
-    lastLineEmpty: boolean,
-    lines: number[],
-    nextLine: number,
-    offset: number,
-    oldBMarks: number[],
-    oldBSCount: number[],
-    oldIndent: number,
-    oldParentType: 'blockquote' | 'list' | 'root' | 'paragraph' | 'reference',
-    oldSCount: number[],
-    oldTShift: number[],
-    spaceAfterMarker: boolean,
-    terminate: boolean,
-    terminatorRules: RuleBlock[],
-    token: Token,
-    wasOutdented: boolean,
-    oldLineMax: number = state.lineMax,
-    pos: number = state.bMarks[startLine] + state.tShift[startLine],
-    max: number = state.eMarks[startLine];
+  let initial: number,
+      lastLineEmpty: boolean = false,
+      nextLine: number,
+      offset: number,
+      oldBMarks: number[] = [],
+      oldBSCount: number[] = [],
+      oldSCount: number[] = [],
+      oldTShift: number[] = [],
+      oldIndent: number,
+      oldLineMax: number = state.lineMax,
+      pos: number = state.bMarks[startLine] + state.tShift[startLine],
+      max: number = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
-  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+  if (state.isMoreIndent(startLine)) { return false; }
 
   // check the block quote marker
   if (state.src.charCodeAt(pos++) !== 0x3E/* > */) { return false; }
@@ -42,73 +28,84 @@ module.exports = function blockquote(state: StateBlock, startLine: number, endLi
   // so no point trying to find the end of it in silent mode
   if (silent) { return true; }
 
-  // skip spaces after ">" and re-calculate offset
-  initial = offset = state.sCount[startLine] + pos - (state.bMarks[startLine] + state.tShift[startLine]);
-
-  // skip one optional space after '>'
-  if (state.src.charCodeAt(pos) === 0x20 /* space */) {
-    // ' >   test '
-    //     ^ -- position start of line here:
-    pos++;
-    initial++;
-    offset++;
-    adjustTab = false;
-    spaceAfterMarker = true;
-  } else if (state.src.charCodeAt(pos) === 0x09 /* tab */) {
-    spaceAfterMarker = true;
-
-    if ((state.bsCount[startLine] + offset) % 4 === 3) {
-      // '  >\t  test '
-      //       ^ -- position start of line here (tab has width===1)
+  function skipOptionalSpace(startLine) {
+    // skip one optional space after '>'
+    if (state.src.charCodeAt(pos) === 0x20 /* space */) {
+      // ' >   test '
+      //     ^ -- position start of line here:
       pos++;
       initial++;
       offset++;
       adjustTab = false;
-    } else {
-      // ' >\t  test '
-      //    ^ -- position start of line here + shift bsCount slightly
-      //         to make extra space appear
-      adjustTab = true;
-    }
-  } else {
-    spaceAfterMarker = false;
-  }
-
-  oldBMarks = [ state.bMarks[startLine] ];
-  state.bMarks[startLine] = pos;
-
-  while (pos < max) {
-    ch = state.src.charCodeAt(pos);
-
-    if (isSpace(ch)) {
-      if (ch === 0x09) {
-        offset += 4 - (offset + state.bsCount[startLine] + (adjustTab ? 1 : 0)) % 4;
-      } else {
+      return true;
+    } else if (state.src.charCodeAt(pos) === 0x09 /* tab */) {
+      if ((state.bsCount[startLine] + offset) % 4 === 3) {
+        // '  >\t  test '
+        //       ^ -- position start of line here (tab has width===1)
+        pos++;
+        initial++;
         offset++;
+        adjustTab = false;
+      } else {
+        // ' >\t  test '
+        //    ^ -- position start of line here + shift bsCount slightly
+        //         to make extra space appear
+        adjustTab = true;
       }
+      return true;
     } else {
-      break;
+      return false;
     }
-
-    pos++;
   }
 
-  oldBSCount = [ state.bsCount[startLine] ];
-  state.bsCount[startLine] = state.sCount[startLine] + 1 + (spaceAfterMarker ? 1 : 0);
+  function caclOffset(){
+    while (pos < max) {
+      let ch = state.src.charCodeAt(pos);
 
-  lastLineEmpty = pos >= max;
+      if (isSpace(ch)) {
+        if (ch === 0x09) {
+          offset += 4 - (offset + state.bsCount[startLine] + (adjustTab ? 1 : 0)) % 4;
+        } else {
+          offset++;
+        }
+      } else {
+        break;
+      }
 
-  oldSCount = [ state.sCount[startLine] ];
-  state.sCount[startLine] = offset - initial;
+      pos++;
+    }
+  }
 
-  oldTShift = [ state.tShift[startLine] ];
-  state.tShift[startLine] = pos - state.bMarks[startLine];
+  function checkBlockquote(startLine){
+    // skip spaces after ">" and re-calculate offset
+    initial = offset = state.sCount[startLine] + pos - (state.bMarks[startLine] + state.tShift[startLine]);
+    let spaceAfterMarker = skipOptionalSpace(startLine);
 
-  terminatorRules = state.md.block.ruler.getRules('blockquote');
+    oldBMarks.push(state.bMarks[nextLine]);
+    state.bMarks[startLine] = pos;
 
-  oldParentType = state.parentType;
+    caclOffset();
+
+    oldBSCount.push(state.bsCount[nextLine]);
+    state.bsCount[startLine] = state.sCount[startLine] + 1 + (spaceAfterMarker ? 1 : 0);
+
+    lastLineEmpty = pos >= max;
+
+    oldSCount.push(state.sCount[nextLine]);
+    state.sCount[startLine] = offset - initial;
+
+    oldTShift.push(state.tShift[nextLine]);
+    state.tShift[startLine] = pos - state.bMarks[startLine];
+  }
+
+  let adjustTab = false;
+  checkBlockquote(startLine);
+
+  let oldParentType = state.parentType;
   state.parentType = 'blockquote';
-  wasOutdented = false;
+
+  let terminatorRules = state.md.block.ruler.getRules('blockquote');
+  let wasOutdented = false;
 
   // Search the end of the block
   //
@@ -150,67 +147,7 @@ module.exports = function blockquote(state: StateBlock, startLine: number, endLi
     if (state.src.charCodeAt(pos++) === 0x3E/* > */ && !wasOutdented) {
       // This line is inside the blockquote.
 
-      // skip spaces after ">" and re-calculate offset
-      initial = offset = state.sCount[nextLine] + pos - (state.bMarks[nextLine] + state.tShift[nextLine]);
-
-      // skip one optional space after '>'
-      if (state.src.charCodeAt(pos) === 0x20 /* space */) {
-        // ' >   test '
-        //     ^ -- position start of line here:
-        pos++;
-        initial++;
-        offset++;
-        adjustTab = false;
-        spaceAfterMarker = true;
-      } else if (state.src.charCodeAt(pos) === 0x09 /* tab */) {
-        spaceAfterMarker = true;
-
-        if ((state.bsCount[nextLine] + offset) % 4 === 3) {
-          // '  >\t  test '
-          //       ^ -- position start of line here (tab has width===1)
-          pos++;
-          initial++;
-          offset++;
-          adjustTab = false;
-        } else {
-          // ' >\t  test '
-          //    ^ -- position start of line here + shift bsCount slightly
-          //         to make extra space appear
-          adjustTab = true;
-        }
-      } else {
-        spaceAfterMarker = false;
-      }
-
-      oldBMarks.push(state.bMarks[nextLine]);
-      state.bMarks[nextLine] = pos;
-
-      while (pos < max) {
-        ch = state.src.charCodeAt(pos);
-
-        if (isSpace(ch)) {
-          if (ch === 0x09) {
-            offset += 4 - (offset + state.bsCount[nextLine] + (adjustTab ? 1 : 0)) % 4;
-          } else {
-            offset++;
-          }
-        } else {
-          break;
-        }
-
-        pos++;
-      }
-
-      lastLineEmpty = pos >= max;
-
-      oldBSCount.push(state.bsCount[nextLine]);
-      state.bsCount[nextLine] = state.sCount[nextLine] + 1 + (spaceAfterMarker ? 1 : 0);
-
-      oldSCount.push(state.sCount[nextLine]);
-      state.sCount[nextLine] = offset - initial;
-
-      oldTShift.push(state.tShift[nextLine]);
-      state.tShift[nextLine] = pos - state.bMarks[nextLine];
+      checkBlockquote(nextLine);
       continue;
     }
 
@@ -218,8 +155,8 @@ module.exports = function blockquote(state: StateBlock, startLine: number, endLi
     if (lastLineEmpty) { break; }
 
     // Case 3: another tag found.
-    terminate = false;
-    for (i = 0, l = terminatorRules.length; i < l; i++) {
+    let terminate = false;
+    for (let i = 0, l = terminatorRules.length; i < l; i++) {
       if (terminatorRules[i](state, nextLine, endLine, true)) {
         terminate = true;
         break;
@@ -260,9 +197,9 @@ module.exports = function blockquote(state: StateBlock, startLine: number, endLi
   oldIndent = state.blkIndent;
   state.blkIndent = 0;
 
-  token        = state.push('blockquote_open', 'blockquote', 1);
+  let token        = state.push('blockquote_open', 'blockquote', 1);
   token.markup = '>';
-  token.map    = lines = [ startLine, 0 ];
+  token.map    = [ startLine, 0 ];
 
   state.md.block.tokenize(state, startLine, nextLine);
 
@@ -271,11 +208,10 @@ module.exports = function blockquote(state: StateBlock, startLine: number, endLi
 
   state.lineMax = oldLineMax;
   state.parentType = oldParentType;
-  lines[1] = state.line;
 
   // Restore original tShift; this might not be necessary since the parser
   // has already been here, but just to make sure we can do that.
-  for (i = 0; i < oldTShift.length; i++) {
+  for (let i = 0; i < oldTShift.length; i++) {
     state.bMarks[i + startLine] = oldBMarks[i];
     state.tShift[i + startLine] = oldTShift[i];
     state.sCount[i + startLine] = oldSCount[i];
