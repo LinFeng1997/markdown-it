@@ -16,7 +16,7 @@ module.exports = function hr(state: StateBlock, startLine: number, endLine: numb
     max: number = state.eMarks[startLine];
 
   // if it's indented more than 3 spaces, it should be a code block
-  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+  if (state.isMoreIndent(startLine)) { return false; }
 
   marker = state.src.charCodeAt(pos++);
 

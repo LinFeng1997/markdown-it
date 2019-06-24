@@ -277,6 +277,13 @@ class StateBlock extends State{
     return queue.join('');
   }
 
+  // if it's indented more than 3 spaces, it should be a code block
+  isMoreIndent(startLine) {
+    if (this.sCount[startLine] - this.blkIndent >= 4) {
+      return true;
+    }
+  }
+
   // re-export Token class to use in block rules
   Token = Token
 }

@@ -2,36 +2,37 @@
 
 
 import StateBlock from "./state_block";
-import Token = require('../token');;
+import Token = require('../token');
 
 module.exports = function fence(state: StateBlock, startLine: number, endLine: number, silent: boolean) {
-  let marker: number,
-    len: number,
-    params: string,
+  let params: string,
     nextLine: number,
-    mem: number,
     token: Token,
     markup: string,
     haveEndMarker: boolean = false,
     pos: number = state.bMarks[startLine] + state.tShift[startLine],
     max: number = state.eMarks[startLine];
 
+  function scanMarker(mem) {
+    // scan marker length
+    pos = state.skipChars(pos, marker);
+
+    return pos - mem;
+  }
+
   // if it's indented more than 3 spaces, it should be a code block
-  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+  if (state.isMoreIndent(startLine)) { return false; }
 
   if (pos + 3 > max) { return false; }
 
-  marker = state.src.charCodeAt(pos);
+  let marker = state.src.charCodeAt(pos);
 
   if (marker !== 0x7E/* ~ */ && marker !== 0x60 /* ` */) {
     return false;
   }
 
-  // scan marker length
-  mem = pos;
-  pos = state.skipChars(pos, marker);
-
-  len = pos - mem;
+  let mem = pos;
+  let len = scanMarker(mem);
 
   if (len < 3) { return false; }
 
