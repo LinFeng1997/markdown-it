@@ -3,7 +3,7 @@
 
 
 import StateBlock from "./state_block";
-import Token = require('../token');;
+import Token = require('../token');
 const isSpace = require('../common/utils').isSpace;
 
 // Search `[-+*][\n ]`, returns next pos after marker on success
@@ -99,39 +99,7 @@ function markTightParagraphs(state: StateBlock, idx: number) {
   }
 }
 
-
-module.exports = function list(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean {
-  let ch: number,
-    contentStart: number,
-    i: number,
-    indent: number,
-    indentAfterMarker: number,
-    initial: number,
-    isOrdered: boolean,
-    itemLines: number[],
-    l: number,
-    listLines: number[],
-    listTokIdx: number,
-    markerCharCode: number,
-    markerValue: number = 0,
-    max: number,
-    nextLine: number,
-    offset: number,
-    oldIndent: number,
-    oldLIndent: number,
-    oldTShift: number,
-    oldTight: boolean,
-    pos: number,
-    posAfterMarker: number,
-    prevEmptyEnd: boolean,
-    start: number,
-    token: Token,
-    isTerminatingParagraph: boolean = false,
-    tight: boolean = true;
-
-  // if it's indented more than 3 spaces, it should be a code block
-  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
-
+function checkTerminatingParagraph(state: StateBlock, startLine: number, silent: boolean): boolean {
   // limit conditions when list can interrupt
   // a paragraph (validation mode only)
   if (silent && state.parentType === 'paragraph') {
@@ -141,41 +109,82 @@ module.exports = function list(state: StateBlock, startLine: number, endLine: nu
     // but I hope the spec gets fixed long before that happens.
     //
     if (state.tShift[startLine] >= state.blkIndent) {
-      isTerminatingParagraph = true;
+      return true;
+    }
+  }
+  return false;
+}
+
+module.exports = function list(state: StateBlock, startLine: number, endLine: number, silent: boolean): boolean {
+  let ch: number,
+    contentStart: number,
+    indent: number,
+    indentAfterMarker: number,
+    initial: number,
+    itemLines: number[],
+    markerValue: number = 0,
+    max: number,
+    offset: number,
+    oldIndent: number,
+    oldLIndent: number,
+    oldTShift: number,
+    oldTight: boolean,
+    posAfterMarker = 0,
+    start: number,
+    token: Token,
+    tight: boolean = true;
+
+  // if it's indented more than 3 spaces, it should be a code block
+  if (state.isMoreIndent(startLine)) { return false; }
+
+  let isTerminatingParagraph = checkTerminatingParagraph(state,startLine,silent);
+
+  function DetectListType() {
+    // Detect list type and position after marker
+    if ((posAfterMarker = skipOrderedListMarker(state, startLine)) >= 0) {
+      start = state.bMarks[startLine] + state.tShift[startLine];
+      markerValue = Number(state.src.substr(start, posAfterMarker - start - 1));
+
+      // If we're starting a new ordered list right after
+      // a paragraph, it should start with 1.
+      if (isTerminatingParagraph && markerValue !== 1) return null;
+
+      return true;
+    } else if ((posAfterMarker = skipBulletListMarker(state, startLine)) >= 0) {
+      return false
+    } else {
+      return null;
     }
   }
 
-  // Detect list type and position after marker
-  if ((posAfterMarker = skipOrderedListMarker(state, startLine)) >= 0) {
-    isOrdered = true;
-    start = state.bMarks[startLine] + state.tShift[startLine];
-    markerValue = Number(state.src.substr(start, posAfterMarker - start - 1));
+  function isPrevEmptyEnd(state, startLine) {
+    return state.line - startLine > 1 && state.isEmpty(state.line - 1);
+  }
 
-    // If we're starting a new ordered list right after
-    // a paragraph, it should start with 1.
-    if (isTerminatingParagraph && markerValue !== 1) return false;
-
-  } else if ((posAfterMarker = skipBulletListMarker(state, startLine)) >= 0) {
-    isOrdered = false;
-
-  } else {
+  function findTerminate(){
+    for (let i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        return true;
+      }
+    }
     return false;
   }
 
+  let isOrdered = DetectListType();
+  if (isOrdered === null) return false;
+
   // If we're starting a new unordered list right after
   // a paragraph, first line should not be empty.
-  if (isTerminatingParagraph) {
-    if (state.skipSpaces(posAfterMarker) >= state.eMarks[startLine]) return false;
-  }
+  if (isTerminatingParagraph && (state.skipSpaces(posAfterMarker) >= state.eMarks[startLine])) return false;
 
   // We should terminate list on style change. Remember first one to compare.
-  markerCharCode = state.src.charCodeAt(posAfterMarker - 1);
+  let markerCharCode = state.src.charCodeAt(posAfterMarker - 1);
 
   // For validation mode we can terminate immediately
   if (silent) { return true; }
 
   // Start list
-  listTokIdx = state.tokens.length;
+  let listTokIdx = state.tokens.length;
 
   if (isOrdered) {
     token       = state.push('ordered_list_open', 'ol', 1);
@@ -187,26 +196,21 @@ module.exports = function list(state: StateBlock, startLine: number, endLine: nu
     token       = state.push('bullet_list_open', 'ul', 1);
   }
 
-  token.map    = listLines = [ startLine, 0 ];
+  token.map    = [ startLine, 0 ];
   token.markup = String.fromCharCode(markerCharCode);
 
   //
   // Iterate list items
   //
 
-  nextLine = startLine;
-  prevEmptyEnd = false;
+  let nextLine = startLine;
+  let prevEmptyEnd = false;
   let terminatorRules = state.md.block.ruler.getRules('list');
 
   let oldParentType = state.parentType;
   state.parentType = 'list';
 
-  while (nextLine < endLine) {
-    pos = posAfterMarker;
-    max = state.eMarks[nextLine];
-
-    initial = offset = state.sCount[nextLine] + posAfterMarker - (state.bMarks[startLine] + state.tShift[startLine]);
-
+  function checkOffset(pos) {
     while (pos < max) {
       ch = state.src.charCodeAt(pos);
 
@@ -220,8 +224,13 @@ module.exports = function list(state: StateBlock, startLine: number, endLine: nu
 
       pos++;
     }
+    return pos;
+  }
 
-    contentStart = pos;
+  while (nextLine < endLine) {
+    max = state.eMarks[nextLine];
+    initial = offset = state.sCount[nextLine] + posAfterMarker - (state.bMarks[startLine] + state.tShift[startLine]);
+    let contentStart = checkOffset(posAfterMarker);
 
     if (contentStart >= max) {
       // trimming space in "-    \n  3" case, indent is 1 here
@@ -271,7 +280,7 @@ module.exports = function list(state: StateBlock, startLine: number, endLine: nu
     }
     // Item become loose if finish with empty line,
     // but we should filter last element, because it means list finish
-    prevEmptyEnd = (state.line - startLine) > 1 && state.isEmpty(state.line - 1);
+    prevEmptyEnd = isPrevEmptyEnd(state,startLine);
 
     state.blkIndent = oldIndent;
     state.tShift[startLine] = oldTShift;
@@ -293,14 +302,7 @@ module.exports = function list(state: StateBlock, startLine: number, endLine: nu
     if (state.sCount[nextLine] < state.blkIndent) { break; }
 
     // fail if terminating block found
-    let terminate = false;
-    for (i = 0, l = terminatorRules.length; i < l; i++) {
-      if (terminatorRules[i](state, nextLine, endLine, true)) {
-        terminate = true;
-        break;
-      }
-    }
-    if (terminate) { break; }
+    if (findTerminate()) { break; }
 
     // fail if list has another type
     if (isOrdered) {
@@ -322,7 +324,6 @@ module.exports = function list(state: StateBlock, startLine: number, endLine: nu
   }
   token.markup = String.fromCharCode(markerCharCode);
 
-  listLines[1] = nextLine;
   state.line = nextLine;
 
   state.parentType = oldParentType;
