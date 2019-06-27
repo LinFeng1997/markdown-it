@@ -17,24 +17,12 @@ module.exports = function lheading(state: StateBlock, startLine: number, endLine
     level: number = 0,
     marker: number = 0,
     nextLine: number = startLine + 1,
-    oldParentType: StateBlock['parentType'],
     terminatorRules = state.md.block.ruler.getRules('paragraph');
 
   // if it's indented more than 3 spaces, it should be a code block
-  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+  if (state.isMoreIndent(startLine)) { return false; }
 
-  oldParentType = state.parentType;
-  state.parentType = 'paragraph'; // use paragraph to match terminatorRules
-
-  // jump line-by-line until empty one or EOF
-  for (; nextLine < endLine && !state.isEmpty(nextLine); nextLine++) {
-    // this would be a code block normally, but after paragraph
-    // it's considered a lazy continuation regardless of what's there
-    if (state.sCount[nextLine] - state.blkIndent > 3) { continue; }
-
-    //
-    // Check for underline in setext header
-    //
+  function checkUnderline(){
     if (state.sCount[nextLine] >= state.blkIndent) {
       pos = state.bMarks[nextLine] + state.tShift[nextLine];
       max = state.eMarks[nextLine];
@@ -48,10 +36,27 @@ module.exports = function lheading(state: StateBlock, startLine: number, endLine
 
           if (pos >= max) {
             level = (marker === 0x3D/* = */ ? 1 : 2);
-            break;
+            return true;
           }
         }
       }
+    }
+  }
+
+  let oldParentType = state.parentType;
+  state.parentType = 'paragraph'; // use paragraph to match terminatorRules
+
+  // jump line-by-line until empty one or EOF
+  for (; nextLine < endLine && !state.isEmpty(nextLine); nextLine++) {
+    // this would be a code block normally, but after paragraph
+    // it's considered a lazy continuation regardless of what's there
+    if (state.sCount[nextLine] - state.blkIndent > 3) { continue; }
+
+    //
+    // Check for underline in setext header
+    //
+    if (checkUnderline()) {
+      break;
     }
 
     // quirk for blockquotes, this line should already be checked by that rule
