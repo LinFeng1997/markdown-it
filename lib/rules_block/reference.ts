@@ -8,15 +8,8 @@ const isSpace              = require('../common/utils').isSpace;
 
 module.exports = function reference(state:StateBlock, startLine:number, _endLine:number, silent:boolean) {
     let ch: number,
-        destEndPos: number,
-        destEndLineNo: number,
-        endLine: number,
-        i: number,
-        l: number,
         label: number,
-        labelEnd: number = 0,
         start: number,
-        str: string,
         title: string,
         lines: number = 0,
         pos: number = state.bMarks[startLine] + state.tShift[startLine],
@@ -24,22 +17,76 @@ module.exports = function reference(state:StateBlock, startLine:number, _endLine
         nextLine = startLine + 1;
 
   // if it's indented more than 3 spaces, it should be a code block
-  if (state.sCount[startLine] - state.blkIndent >= 4) { return false; }
+  if (state.isMoreIndent(startLine)) { return false; }
 
   if (state.src.charCodeAt(pos) !== 0x5B/* [ */) { return false; }
 
-  // Simple check to quickly interrupt scan on [link](url) at the start of line.
-  // Can be useful on practice: https://github.com/markdown-it/markdown-it/issues/54
-  while (++pos < max) {
-    if (state.src.charCodeAt(pos) === 0x5D /* ] */ &&
-        state.src.charCodeAt(pos - 1) !== 0x5C/* \ */) {
-      if (pos + 1 === max) { return false; }
-      if (state.src.charCodeAt(pos + 1) !== 0x3A/* : */) { return false; }
-      break;
+  function quickCheckInterrupt() {
+    // Simple check to quickly interrupt scan on [link](url) at the start of line.
+    // Can be useful on practice: https://github.com/markdown-it/markdown-it/issues/54
+    while (++pos < max) {
+      if (state.src.charCodeAt(pos) === 0x5D /* ] */ && state.src.charCodeAt(pos - 1) !== 0x5C/* \ */) {
+        if (pos + 1 === max || state.src.charCodeAt(pos + 1) !== 0x3A/* : */) { return false; }
+        break;
+      }
     }
   }
 
-  endLine = state.lineMax;
+  function isTerminateParagraph(){
+    let terminate = false;
+    for (let i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+    return terminate;
+  }
+
+  function scan(){
+    for (let pos = 1; pos < max; pos++) {
+      let ch = str.charCodeAt(pos);
+      if (ch === 0x5B /* [ */) {
+        return 0;
+      } else if (ch === 0x5D /* ] */) {
+        return pos;
+      } else if (ch === 0x0A /* \n */) {
+        lines++;
+      } else if (ch === 0x5C /* \ */) {
+        pos++;
+        if (pos < max && str.charCodeAt(pos) === 0x0A) {
+          lines++;
+        }
+      }
+    }
+    return 0;
+  }
+
+  function skipWhite(pos){
+    for (; pos < max; pos++) {
+      ch = str.charCodeAt(pos);
+      if (ch === 0x0A) {
+        lines++;
+      } else if (isSpace(ch)) {
+        /*eslint no-empty:0*/
+      } else {
+        break;
+      }
+    }
+    return pos;
+  }
+
+  function skipTrailingSpaces(){
+    while (pos < max) {
+      let ch = str.charCodeAt(pos);
+      if (!isSpace(ch)) { break; }
+      pos++;
+    }
+  }
+
+  quickCheckInterrupt();
+
+  let endLine = state.lineMax;
 
   // jump line-by-line until empty one or EOF
   let terminatorRules = state.md.block.ruler.getRules('reference');
@@ -56,50 +103,19 @@ module.exports = function reference(state:StateBlock, startLine:number, _endLine
     if (state.sCount[nextLine] < 0) { continue; }
 
     // Some tags can terminate paragraph without empty line.
-    let terminate = false;
-    for (i = 0, l = terminatorRules.length; i < l; i++) {
-      if (terminatorRules[i](state, nextLine, endLine, true)) {
-        terminate = true;
-        break;
-      }
-    }
-    if (terminate) { break; }
+    if (isTerminateParagraph()) { break; }
   }
 
-  str = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
+  let str = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
   max = str.length;
 
-  for (pos = 1; pos < max; pos++) {
-    ch = str.charCodeAt(pos);
-    if (ch === 0x5B /* [ */) {
-      return false;
-    } else if (ch === 0x5D /* ] */) {
-      labelEnd = pos;
-      break;
-    } else if (ch === 0x0A /* \n */) {
-      lines++;
-    } else if (ch === 0x5C /* \ */) {
-      pos++;
-      if (pos < max && str.charCodeAt(pos) === 0x0A) {
-        lines++;
-      }
-    }
-  }
+  let labelEnd = scan();
 
   if (labelEnd < 0 || str.charCodeAt(labelEnd + 1) !== 0x3A/* : */) { return false; }
 
   // [label]:   destination   'title'
   //         ^^^ skip optional whitespace here
-  for (pos = labelEnd + 2; pos < max; pos++) {
-    ch = str.charCodeAt(pos);
-    if (ch === 0x0A) {
-      lines++;
-    } else if (isSpace(ch)) {
-      /*eslint no-empty:0*/
-    } else {
-      break;
-    }
-  }
+  pos = skipWhite(labelEnd + 2);
 
   // [label]:   destination   'title'
   //            ^^^^^^^^^^^ parse this
@@ -113,22 +129,13 @@ module.exports = function reference(state:StateBlock, startLine:number, _endLine
   lines += res.lines;
 
   // save cursor state, we could require to rollback later
-  destEndPos = pos;
-  destEndLineNo = lines;
+  let destEndPos = pos;
+  let destEndLineNo = lines;
 
   // [label]:   destination   'title'
   //                       ^^^ skipping those spaces
   start = pos;
-  for (; pos < max; pos++) {
-    ch = str.charCodeAt(pos);
-    if (ch === 0x0A) {
-      lines++;
-    } else if (isSpace(ch)) {
-      /*eslint no-empty:0*/
-    } else {
-      break;
-    }
-  }
+  pos = skipWhite(pos);
 
   // [label]:   destination   'title'
   //                          ^^^^^^^ parse this
@@ -144,11 +151,7 @@ module.exports = function reference(state:StateBlock, startLine:number, _endLine
   }
 
   // skip trailing spaces until the rest of the line
-  while (pos < max) {
-    ch = str.charCodeAt(pos);
-    if (!isSpace(ch)) { break; }
-    pos++;
-  }
+  skipTrailingSpaces();
 
   if (pos < max && str.charCodeAt(pos) !== 0x0A) {
     if (title) {
@@ -157,11 +160,7 @@ module.exports = function reference(state:StateBlock, startLine:number, _endLine
       title = '';
       pos = destEndPos;
       lines = destEndLineNo;
-      while (pos < max) {
-        ch = str.charCodeAt(pos);
-        if (!isSpace(ch)) { break; }
-        pos++;
-      }
+      skipTrailingSpaces();
     }
   }
 

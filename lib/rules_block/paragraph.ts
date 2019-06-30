@@ -6,16 +6,24 @@ import StateBlock from "./state_block";
 import Token = require('../token');;
 
 module.exports = function paragraph(state:StateBlock, startLine: number/*, endLine*/) {
-  let content: string,
-    i: number,
-    l: number,
-    token: Token,
+  let token: Token,
     nextLine: number = startLine + 1,
     terminatorRules = state.md.block.ruler.getRules('paragraph'),
     endLine = state.lineMax;
 
   let oldParentType = state.parentType;
   state.parentType = 'paragraph';
+
+  function isTerminate() {
+    let terminate = false;
+    for (let i = 0, l = terminatorRules.length; i < l; i++) {
+      if (terminatorRules[i](state, nextLine, endLine, true)) {
+        terminate = true;
+        break;
+      }
+    }
+    return terminate;
+  }
 
   // jump line-by-line until empty one or EOF
   for (; nextLine < endLine && !state.isEmpty(nextLine); nextLine++) {
@@ -27,17 +35,11 @@ module.exports = function paragraph(state:StateBlock, startLine: number/*, endLi
     if (state.sCount[nextLine] < 0) { continue; }
 
     // Some tags can terminate paragraph without empty line.
-    let terminate = false;
-    for (i = 0, l = terminatorRules.length; i < l; i++) {
-      if (terminatorRules[i](state, nextLine, endLine, true)) {
-        terminate = true;
-        break;
-      }
-    }
+    let terminate = isTerminate();
     if (terminate) { break; }
   }
 
-  content = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
+  let content = state.getLines(startLine, nextLine, state.blkIndent, false).trim();
 
   state.line = nextLine;
 
