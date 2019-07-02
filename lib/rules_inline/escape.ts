@@ -20,6 +20,14 @@ module.exports = function escape(state: StateInline, silent:boolean):boolean {
 
   if (state.src.charCodeAt(pos) !== 0x5C/* \ */) { return false; }
 
+  function skipLeadingWhite(){
+    while (pos < max) {
+      ch = state.src.charCodeAt(pos);
+      if (!isSpace(ch)) { break; }
+      pos++;
+    }
+  }
+
   pos++;
 
   if (pos < max) {
@@ -38,11 +46,7 @@ module.exports = function escape(state: StateInline, silent:boolean):boolean {
 
       pos++;
       // skip leading whitespaces from next line
-      while (pos < max) {
-        ch = state.src.charCodeAt(pos);
-        if (!isSpace(ch)) { break; }
-        pos++;
-      }
+      skipLeadingWhite();
 
       state.pos = pos;
       return true;
