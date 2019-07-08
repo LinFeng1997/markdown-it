@@ -3,7 +3,6 @@
 
 import StateInline from "./state_inline";
 import Token = require("../token");
-import MarkdownIt = require("../../types/index");
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
@@ -70,16 +69,12 @@ module.exports.tokenize = function emphasis(state: StateInline, silent: boolean)
 // Walk through delimiter list and replace text tokens with tags
 //
 module.exports.postProcess = function emphasis(state: StateInline): void {
-  let startDelim: MarkdownIt.Delimiter,
-    endDelim: MarkdownIt.Delimiter,
-    token: Token,
-    ch: string,
-    isStrong: boolean,
+  let token: Token,
     delimiters = state.delimiters,
     max: number = state.delimiters.length;
 
   for (let i = max - 1; i >= 0; i--) {
-    startDelim = delimiters[i];
+    let startDelim = delimiters[i];
 
     if (startDelim.marker !== 0x5F/* _ */ && startDelim.marker !== 0x2A/* * */) {
       continue;
@@ -90,20 +85,20 @@ module.exports.postProcess = function emphasis(state: StateInline): void {
       continue;
     }
 
-    endDelim = delimiters[startDelim.end];
+    let endDelim = delimiters[startDelim.end];
 
     // If the previous delimiter has the same marker and is adjacent to this one,
     // merge those into one strong delimiter.
     //
     // `<em><em>whatever</em></em>` -> `<strong>whatever</strong>`
     //
-    isStrong = i > 0 &&
+    let isStrong = i > 0 &&
                delimiters[i - 1].end === startDelim.end + 1 &&
                delimiters[i - 1].token === startDelim.token - 1 &&
                delimiters[startDelim.end + 1].token === endDelim.token + 1 &&
                delimiters[i - 1].marker === startDelim.marker;
 
-    ch = String.fromCharCode(startDelim.marker);
+    let ch = String.fromCharCode(startDelim.marker);
 
     token         = state.tokens[startDelim.token];
     token.type    = isStrong ? 'strong_open' : 'em_open';
