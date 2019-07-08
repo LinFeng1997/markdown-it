@@ -3,19 +3,11 @@
 
 import StateInline from "./state_inline";
 import Token = require("../token");
-import MarkdownIt = require("../../types/index");
 
 // Insert each marker as a separate text token, and add it to delimiter list
 //
 module.exports.tokenize = function strikethrough(state: StateInline, silent: boolean): boolean  {
-  let scanned:  {
-      can_open: boolean | number,
-      can_close: boolean | string,
-      length: number
-    },
-    token: Token,
-    len: number,
-    ch: string,
+  let token: Token,
     start = state.pos,
     marker: number = state.src.charCodeAt(start);
 
@@ -23,9 +15,9 @@ module.exports.tokenize = function strikethrough(state: StateInline, silent: boo
 
   if (marker !== 0x7E/* ~ */) { return false; }
 
-  scanned = state.scanDelims(state.pos, true);
-  len = scanned.length;
-  ch = String.fromCharCode(marker);
+  let scanned = state.scanDelims(state.pos, true);
+  let len = scanned.length;
+  let ch = String.fromCharCode(marker);
 
   if (len < 2) { return false; }
 
@@ -60,17 +52,18 @@ module.exports.tokenize = function strikethrough(state: StateInline, silent: boo
 // Walk through delimiter list and replace text tokens with tags
 //
 module.exports.postProcess = function strikethrough(state) {
-  let i:number,
-      j:number,
-      startDelim:MarkdownIt.Delimiter,
-      endDelim:MarkdownIt.Delimiter,
-      token:Token,
+  let token:Token,
       loneMarkers:number[] = [],
-      delimiters = state.delimiters,
       max = state.delimiters.length;
 
-  for (i = 0; i < max; i++) {
-    startDelim = delimiters[i];
+  function swapToken(i,j) {
+    token = state.tokens[j];
+    state.tokens[j] = state.tokens[i];
+    state.tokens[i] = token;
+  }
+
+  for (let i = 0; i < max; i++) {
+    let startDelim = state.delimiters[i];
 
     if (startDelim.marker !== 0x7E/* ~ */) {
       continue;
@@ -80,7 +73,7 @@ module.exports.postProcess = function strikethrough(state) {
       continue;
     }
 
-    endDelim = delimiters[startDelim.end];
+    let endDelim = state.delimiters[startDelim.end];
 
     token         = state.tokens[startDelim.token];
     token.type    = 's_open';
@@ -110,8 +103,8 @@ module.exports.postProcess = function strikethrough(state) {
   // So, we have to move all those markers after subsequent s_close tags.
   //
   while (loneMarkers.length) {
-    i = loneMarkers.pop() || 0;
-    j = i + 1;
+    let i = loneMarkers.pop() || 0;
+    let j = i + 1;
 
     while (j < state.tokens.length && state.tokens[j].type === 's_close') {
       j++;
@@ -120,9 +113,7 @@ module.exports.postProcess = function strikethrough(state) {
     j--;
 
     if (i !== j) {
-      token = state.tokens[j];
-      state.tokens[j] = state.tokens[i];
-      state.tokens[i] = token;
+      swapToken(i,j)
     }
   }
 };
