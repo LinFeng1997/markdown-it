@@ -9,23 +9,7 @@ var isSpace              = require('../common/utils').isSpace;
 
 
 module.exports = function link(state: StateInline, silent: boolean): boolean {
-  let attrs: string[][],
-    code: number,
-    label: string = '',
-    labelEnd: number,
-    labelStart: number,
-    pos: number,
-    res: {
-      ok: boolean,
-      pos: number,
-      str: string
-    },
-    ref: {
-      href: string,
-      title: string
-    },
-    title: string = '',
-    token: Token,
+  let title: string = '',
     href = '',
     oldPos = state.pos,
     max = state.posMax,
@@ -33,35 +17,15 @@ module.exports = function link(state: StateInline, silent: boolean): boolean {
     parseReference = true;
 
   if (state.src.charCodeAt(state.pos) !== 0x5B/* [ */) { return false; }
-
-  labelStart = state.pos + 1;
-  labelEnd = state.md.helpers.parseLinkLabel(state, state.pos, true);
-
-  // parser failed to find ']', so it's not a valid link
-  if (labelEnd < 0) { return false; }
-
-  pos = labelEnd + 1;
-  if (pos < max && state.src.charCodeAt(pos) === 0x28/* ( */) {
-    //
-    // Inline link
-    //
-
-    // might have found a valid shortcut link, disable reference parsing
-    parseReference = false;
-
-    // [link](  <href>  "title"  )
-    //        ^^ skipping these spaces
-    pos++;
+  function skipLinkSpace() {
     for (; pos < max; pos++) {
-      code = state.src.charCodeAt(pos);
+      let code = state.src.charCodeAt(pos);
       if (!isSpace(code) && code !== 0x0A) { break; }
     }
-    if (pos >= max) { return false; }
-
-    // [link](  <href>  "title"  )
-    //          ^^^^^^ parsing link destination
-    start = pos;
-    res = state.md.helpers.parseLinkDestination(state.src, pos, state.posMax);
+  }
+  function parseLinkDes() {
+    href = '';
+    let res = state.md.helpers.parseLinkDestination(state.src, pos, state.posMax);
     if (res.ok) {
       href = state.md.normalizeLink(res.str);
       if (state.md.validateLink(href)) {
@@ -70,45 +34,57 @@ module.exports = function link(state: StateInline, silent: boolean): boolean {
         href = '';
       }
     }
-
-    // [link](  <href>  "title"  )
-    //                ^^ skipping these spaces
-    start = pos;
-    for (; pos < max; pos++) {
-      code = state.src.charCodeAt(pos);
-      if (!isSpace(code) && code !== 0x0A) { break; }
-    }
-
-    // [link](  <href>  "title"  )
-    //                  ^^^^^^^ parsing link title
-    res = state.md.helpers.parseLinkTitle(state.src, pos, state.posMax);
+  }
+  function parseLinkTitle() {
+    let res = state.md.helpers.parseLinkTitle(state.src, pos, state.posMax);
     if (pos < max && start !== pos && res.ok) {
       title = res.str;
       pos = res.pos;
 
       // [link](  <href>  "title"  )
       //                         ^^ skipping these spaces
-      for (; pos < max; pos++) {
-        code = state.src.charCodeAt(pos);
-        if (!isSpace(code) && code !== 0x0A) { break; }
-      }
+      skipLinkSpace();
     } else {
       title = '';
     }
-
-    if (pos >= max || state.src.charCodeAt(pos) !== 0x29/* ) */) {
-      // parsing a valid shortcut link failed, fallback to reference
-      parseReference = true;
-    }
-    pos++;
   }
+  function isLink(){
+    if (pos < max && state.src.charCodeAt(pos) === 0x28/* ( */) {
+      //
+      // Inline link
+      //
 
-  if (parseReference) {
-    //
-    // Link reference
-    //
-    if (typeof state.env.references === 'undefined') { return false; }
+      // might have found a valid shortcut link, disable reference parsing
+      parseReference = false;
 
+      // [link](  <href>  "title"  )
+      //        ^^ skipping these spaces
+      pos++;
+      skipLinkSpace();
+      if (pos >= max) { return false; }
+
+      // [link](  <href>  "title"  )
+      //          ^^^^^^ parsing link destination
+      parseLinkDes();
+
+      // [link](  <href>  "title"  )
+      //                ^^ skipping these spaces
+      skipLinkSpace();
+
+      // [link](  <href>  "title"  )
+      //                  ^^^^^^^ parsing link title
+      parseLinkTitle();
+
+      if (pos >= max || state.src.charCodeAt(pos) !== 0x29/* ) */) {
+        // parsing a valid shortcut link failed, fallback to reference
+        parseReference = true;
+      }
+      pos++;
+    }
+    return true;
+  }
+  function parseLinkRef(){
+    let label = '';
     if (pos < max && state.src.charCodeAt(pos) === 0x5B/* [ */) {
       start = pos + 1;
       pos = state.md.helpers.parseLinkLabel(state, pos);
@@ -125,7 +101,28 @@ module.exports = function link(state: StateInline, silent: boolean): boolean {
     // (collapsed reference link and shortcut reference link respectively)
     if (!label) { label = state.src.slice(labelStart, labelEnd); }
 
-    ref = state.env.references[normalizeReference(label)];
+    let ref = state.env.references[normalizeReference(label)];
+    return ref;
+  }
+
+  let labelStart = state.pos + 1;
+  let labelEnd = state.md.helpers.parseLinkLabel(state, state.pos, true);
+
+  // parser failed to find ']', so it's not a valid link
+  if (labelEnd < 0) { return false; }
+
+  let pos = labelEnd + 1;
+
+  if(!isLink()){
+    return false;
+  }
+  if (parseReference) {
+    //
+    // Link reference
+    //
+    if (typeof state.env.references === 'undefined') { return false; }
+
+    let ref = parseLinkRef();
     if (!ref) {
       state.pos = oldPos;
       return false;
@@ -142,10 +139,10 @@ module.exports = function link(state: StateInline, silent: boolean): boolean {
     state.pos = labelStart;
     state.posMax = labelEnd;
 
-    token        = state.push('link_open', 'a', 1);
-    token.attrs  = attrs = [ [ 'href', href ] ];
+    let token        = state.push('link_open', 'a', 1);
+    token.attrs  = [ [ 'href', href ] ];
     if (title) {
-      attrs.push([ 'title', title ]);
+      token.attrs.push([ 'title', title ]);
     }
 
     state.md.inline.tokenize(state);
