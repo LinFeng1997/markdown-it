@@ -15,36 +15,45 @@ var NAMED_RE   = /^&([a-z][a-z0-9]{1,31});/i;
 
 
 module.exports = function entity(state: StateInline, silent: boolean): boolean {
-  let ch: number,
-    code: number,
-    match: RegExpMatchArray | null,
-    pos = state.pos,
+  let pos = state.pos,
     max = state.posMax;
 
   if (state.src.charCodeAt(pos) !== 0x26/* & */) { return false; }
 
-  if (pos + 1 < max) {
-    ch = state.src.charCodeAt(pos + 1);
+  function matchReg(reg) {
+    return state.src.slice(pos).match(reg);
+  }
 
-    if (ch === 0x23 /* # */) {
-      match = state.src.slice(pos).match(DIGITAL_RE);
-      if (match) {
-        if (!silent) {
-          code = match[1][0].toLowerCase() === 'x' ? parseInt(match[1].slice(1), 16) : parseInt(match[1], 10);
-          state.pending += isValidEntityCode(code) ? fromCodePoint(code) : fromCodePoint(0xFFFD);
-        }
-        state.pos += match[0].length;
-        return true;
+  function matchDigitalChar(match) {
+    if (match) {
+      if (!silent) {
+        let code = match[1][0].toLowerCase() === 'x' ? parseInt(match[1].slice(1), 16) : parseInt(match[1], 10);
+        state.pending += isValidEntityCode(code) ? fromCodePoint(code) : fromCodePoint(0xFFFD);
       }
-    } else {
-      match = state.src.slice(pos).match(NAMED_RE);
-      if (match) {
-        if (has(entities, match[1])) {
-          if (!silent) { state.pending += entities[match[1]]; }
-          state.pos += match[0].length;
-          return true;
-        }
+      state.pos += match[0].length;
+      return true;
+    }
+  }
+
+  function matchNamedChar(match) {
+    if (match && has(entities, match[1])) {
+      if (!silent) {
+        state.pending += entities[match[1]];
       }
+      state.pos += match[0].length;
+      return true;
+    }
+  }
+
+  if (pos + 1 < max) {
+    let ch = state.src.charCodeAt(pos + 1);
+
+    if (ch === 0x23 /* # */ && matchDigitalChar(matchReg(DIGITAL_RE))) {
+      return true;
+    }
+
+    if (matchNamedChar(matchReg(NAMED_RE))) {
+      return true;
     }
   }
 
