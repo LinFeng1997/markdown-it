@@ -6,21 +6,35 @@ import StateInline from "./state_inline";
 module.exports = function text_collapse(state: StateInline): void {
   let curr: number,
     last: number,
-    level = 0,
     tokens = state.tokens,
     max: number = state.tokens.length;
 
-  for (curr = last = 0; curr < max; curr++) {
-    // re-calculate levels
-    level += tokens[curr].nesting;
-    tokens[curr].level = level;
+  function reCalLevels() {
+    let level = 0;
+    state.tokens.forEach(token => {
+      level += token.nesting;
+      token.level += level;
+    })
+  }
 
-    if (tokens[curr].type === 'text' &&
+  function isTextToken(tokens,curr) {
+    return tokens[curr].type === 'text' &&
         curr + 1 < max &&
-        tokens[curr + 1].type === 'text') {
+        tokens[curr + 1].type === 'text';
+  }
 
-      // collapse two adjacent text nodes
-      tokens[curr + 1].content = tokens[curr].content + tokens[curr + 1].content;
+  function collapseText(){
+    // collapse two adjacent text nodes
+    tokens[curr + 1].content = tokens[curr].content + tokens[curr + 1].content;
+  }
+
+  // re-calculate levels
+  reCalLevels();
+
+  for (curr = last = 0; curr < max; curr++) {
+    if (isTextToken(tokens,curr)) {
+
+      collapseText()
     } else {
       if (curr !== last) { tokens[last] = tokens[curr]; }
 
@@ -28,7 +42,7 @@ module.exports = function text_collapse(state: StateInline): void {
     }
   }
 
-  if (curr !== last) {
+  if (max > last) {
     tokens.length = last;
   }
 };
