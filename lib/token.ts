@@ -133,16 +133,9 @@ class Token {
    * Search attribute index by name.
    **/
   attrIndex(name: string): number {
-    var attrs, i, len;
-
     if (!this.attrs) { return -1; }
 
-    attrs = this.attrs;
-
-    for (i = 0, len = attrs.length; i < len; i++) {
-      if (attrs[i][0] === name) { return i; }
-    }
-    return -1;
+    return this.attrs.findIndex(attr => attr[0] === name);
   };
 
   /**
@@ -164,14 +157,15 @@ class Token {
    * Set `name` attribute to `value`. Override old value if exists.
    **/
   attrSet(name: string, value: string): void {
-    var idx = this.attrIndex(name),
+    let idx = this.attrIndex(name),
       attrData = [ name, value ];
 
     if (idx < 0) {
       this.attrPush(attrData);
-    } else {
-      if (this.attrs) this.attrs[idx] = attrData;
+      return;
     }
+
+    if (this.attrs) this.attrs[idx] = attrData;
   };
 
   /**
@@ -180,11 +174,11 @@ class Token {
    * Get the value of attribute `name`, or null if it does not exist.
    **/
   attrGet(name: string): string | null {
-    let idx = this.attrIndex(name), value: string | null = null;
-    if (idx >= 0 && this.attrs) {
-      value = this.attrs[idx][1];
-    }
-    return value;
+    let idx = this.attrIndex(name);
+
+    if(idx < 0 || !this.attrs) return null;
+
+    return this.attrs[idx][1];
   };
 
   /**
@@ -194,13 +188,14 @@ class Token {
    * exists. Useful to operate with token classes.
    **/
   attrJoin(name: string, value: string) : void {
-    var idx = this.attrIndex(name);
+    let idx = this.attrIndex(name);
 
     if (idx < 0) {
       this.attrPush([ name, value ]);
-    } else {
-      if (this.attrs) this.attrs[idx][1] = this.attrs[idx][1] + ' ' + value;
+      return
     }
+
+    if (this.attrs) this.attrs[idx][1] = this.attrs[idx][1] + ' ' + value;
   };
 
 }
