@@ -18,7 +18,7 @@ var escapeHtml      = require('./common/utils').escapeHtml;
 
 
 ////////////////////////////////////////////////////////////////////////////////
-
+const getLangName = (info) => info ? info.split(/\s+/g)[0] : '';
 const default_rules = {
   code_inline: function (tokens: Token[], idx: number, options: any, env: any, slf: Renderer): string {
     let token: Token = tokens[idx];
@@ -37,20 +37,21 @@ const default_rules = {
   fence: function (tokens: Token[], idx: number, options: any, env: any, slf: Renderer): string {
     let token:Token = tokens[idx],
       info = token.info ? unescapeAll(token.info).trim() : '',
-      langName = '',
-      highlighted: string,
       i: number;
 
-    if (info) {
-      langName = info.split(/\s+/g)[0];
+    const getHighlight = () => {
+      return options.highlight ? options.highlight(token.content, langName) || escapeHtml(token.content) : escapeHtml(token.content);
     }
 
-    if (options.highlight) {
-      highlighted = options.highlight(token.content, langName) || escapeHtml(token.content);
-    } else {
-      highlighted = escapeHtml(token.content);
+    const getStr = (token) => {
+      return '<pre><code' + slf.renderAttrs(token) + '>'
+          + highlighted
+          + '</code></pre>\n';
     }
 
+    let langName = getLangName(info);
+
+    let highlighted = getHighlight();
     if (highlighted.indexOf('<pre') === 0) {
       return highlighted + '\n';
     }
@@ -62,26 +63,19 @@ const default_rules = {
       i = token.attrIndex('class');
       let tmpAttrs = token.attrs ? token.attrs.slice() : [];
 
+      // Join
       if (i < 0) {
         tmpAttrs.push(['class', options.langPrefix + langName]);
       } else {
         tmpAttrs[i][1] += ' ' + options.langPrefix + langName;
-      }
+      };
 
-      // Fake token just to render attributes
-      let tmpToken = {
+      return getStr({
         attrs: tmpAttrs
-      } as Token;
-
-      return '<pre><code' + slf.renderAttrs(tmpToken) + '>'
-        + highlighted
-        + '</code></pre>\n';
+      });
     }
 
-
-    return '<pre><code' + slf.renderAttrs(token) + '>'
-      + highlighted
-      + '</code></pre>\n';
+    return getStr(token);
   },
   image: function (tokens: Token[], idx: number, options: any, env: any, slf: Renderer): string {
     let token: any = tokens[idx];
@@ -158,11 +152,9 @@ class Renderer {
    * Render token attributes to string.
    **/
   renderAttrs(token: Token): string {
-    let result: string;
-
     if (!token.attrs) { return ''; }
 
-    result = '';
+    let result = '';
 
     for (let i = 0, l = token.attrs.length; i < l; i++) {
       result += ' ' + escapeHtml(token.attrs[i][0]) + '="' + escapeHtml(token.attrs[i][1]) + '"';
@@ -181,14 +173,36 @@ class Renderer {
    * in [[Renderer#rules]].
    **/
   renderToken(tokens: Token[], idx: number, options: any): string {
-    let nextToken: Token,
-      result = '',
-      needLf = false,
+    let result = '',
       token: Token = tokens[idx];
 
     // Tight list paragraphs
     if (token.hidden) {
       return '';
+    }
+
+    function containInlineTag(token) {
+      // Block-level tag containing an inline tag.
+      //
+      return token.type === 'inline' || token.hidden
+    }
+
+    function sameTypeToken(token,nextToken) {
+      // Opening tag + closing tag of the same type. E.g. `<li></li>`.
+      //
+      return nextToken.nesting === -1 && nextToken.tag === token.tag
+    }
+
+    function checkAddNewLine() {
+      if (!token.block) {
+        return false;
+      }
+
+      if (token.nesting === 1 && idx + 1 < tokens.length) {
+        return !containInlineTag(tokens[idx + 1]) && !sameTypeToken(token, tokens[idx + 1])
+      }
+
+      return true;
     }
 
     // Insert a newline between hidden paragraph and subsequent opening
@@ -214,26 +228,7 @@ class Renderer {
     }
 
     // Check if we need to add a newline after this tag
-    if (token.block) {
-      needLf = true;
-
-      if (token.nesting === 1) {
-        if (idx + 1 < tokens.length) {
-          nextToken = tokens[idx + 1];
-
-          if (nextToken.type === 'inline' || nextToken.hidden) {
-            // Block-level tag containing an inline tag.
-            //
-            needLf = false;
-
-          } else if (nextToken.nesting === -1 && nextToken.tag === token.tag) {
-            // Opening tag + closing tag of the same type. E.g. `<li></li>`.
-            //
-            needLf = false;
-          }
-        }
-      }
-    }
+    let needLf = checkAddNewLine();
 
     result += needLf ? '>\n' : '>';
 
