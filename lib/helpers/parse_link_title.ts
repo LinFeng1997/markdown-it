@@ -8,8 +8,6 @@ var unescapeAll = require('../common/utils').unescapeAll;
 
 module.exports = function parseLinkTitle(str: string, pos: number, max: number): { ok: boolean, pos: number, lines: number, str: string } {
   let code: number,
-      marker: number,
-      lines = 0,
       start = pos,
       result = {
         ok: false,
@@ -20,7 +18,7 @@ module.exports = function parseLinkTitle(str: string, pos: number, max: number):
 
   if (pos >= max) { return result; }
 
-  marker = str.charCodeAt(pos);
+  let marker = str.charCodeAt(pos);
 
   if (marker !== 0x22 /* " */ && marker !== 0x27 /* ' */ && marker !== 0x28 /* ( */) { return result; }
 
@@ -29,6 +27,7 @@ module.exports = function parseLinkTitle(str: string, pos: number, max: number):
   // if opening marker is "(", switch it to closing marker ")"
   if (marker === 0x28) { marker = 0x29; }
 
+  let lines = 0;
   while (pos < max) {
     code = str.charCodeAt(pos);
     if (code === marker) {
